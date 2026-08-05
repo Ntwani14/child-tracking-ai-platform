@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Missing Child — Missing Children Reporting System</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">🔍 Missing Children System</div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="submit-report.html" class="active">Report Missing Child</a>
+            <span class="nav-user" id="nav-user"></span>
+            <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="form-page">
+            <div class="form-header">
+                <h2>Report a Missing Child</h2>
+                <p>Please fill in as much detail as possible. All fields marked * are required.</p>
+            </div>
+
+            <div id="error-message" class="alert alert-error hidden"></div>
+            <div id="success-message" class="alert alert-success hidden"></div>
+
+            <form id="report-form" class="report-form">
+
+                <div class="form-section">
+                    <h3>Child Information</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="childName">Full Name *</label>
+                            <input type="text" id="childName" placeholder="Child's full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Age *</label>
+                            <input type="number" id="age" placeholder="Age" min="0" max="18" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gender">Gender *</label>
+                            <select id="gender" required>
+                                <option value="">Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateLastSeen">Date Last Seen *</label>
+                            <input type="date" id="dateLastSeen" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="physicalDescription">Physical Description *</label>
+                        <textarea id="physicalDescription" rows="3"
+                            placeholder="Describe clothing, height, skin tone, hair, and any distinguishing features..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastSeenLocation">Last Known Location *</label>
+                        <input type="text" id="lastSeenLocation"
+                            placeholder="e.g. Soshanguve Block H, near the school" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="dashboard.html" class="btn btn-outline">Cancel</a>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        Submit Report
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('nav-user').textContent = 'Welcome, ' + (localStorage.getItem('userName') || '');
+
+        // Set max date to today
+        document.getElementById('dateLastSeen').max = new Date().toISOString().split('T')[0];
+
+        document.getElementById('report-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+            const btn = document.getElementById('submit-btn');
+
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+            btn.textContent = 'Submitting...';
+            btn.disabled = true;
+
+            const reportData = {
+                childName: document.getElementById('childName').value,
+                age: parseInt(document.getElementById('age').value),
+                gender: document.getElementById('gender').value,
+                physicalDescription: document.getElementById('physicalDescription').value,
+                lastSeenLocation: document.getElementById('lastSeenLocation').value,
+                dateLastSeen: document.getElementById('dateLastSeen').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/reports`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(reportData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successDiv.textContent = `Report submitted successfully for ${data.childName}. Report ID: ${data.reportId}`;
+                    successDiv.classList.remove('hidden');
+                    document.getElementById('report-form').reset();
+                    btn.textContent = 'Submit Report';
+                    btn.disabled = false;
+
+                    // Redirect to dashboard after 2 seconds
+                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to submit report. Please try again.';
+                    errorDiv.classList.remove('hidden');
+                    btn.textContent = 'Submit Report';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Could not connect to the server.';
+                errorDiv.classList.remove('hidden');
+                btn.textContent = 'Submit Report';
+                btn.disabled = false;
+            }
+        });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

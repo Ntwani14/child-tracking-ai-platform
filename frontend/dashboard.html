@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Missing Children Reporting System</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">🔍 Missing Children System</div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="submit-report.html">Report Missing Child</a>
+            <span class="nav-user" id="nav-user"></span>
+            <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <span class="stat-number" id="total-reports">0</span>
+                <span class="stat-label">Active Cases</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="today-reports">0</span>
+                <span class="stat-label">Reported Today</span>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-section">
+            <h2>Active Missing Children Reports</h2>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search by name or location..." oninput="handleSearch()">
+                <select id="search-type">
+                    <option value="name">Search by Name</option>
+                    <option value="location">Search by Location</option>
+                </select>
+                <button class="btn btn-primary" onclick="handleSearch()">Search</button>
+                <button class="btn btn-outline" onclick="loadReports()">Show All</button>
+            </div>
+        </div>
+
+        <!-- Alert Message -->
+        <div id="alert-message" class="alert hidden"></div>
+
+        <!-- Reports Grid -->
+        <div id="reports-container" class="reports-grid">
+            <div class="loading">Loading reports...</div>
+        </div>
+
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        // Check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Show logged in user name
+        document.getElementById('nav-user').textContent = 'Welcome, ' + (localStorage.getItem('userName') || '');
+
+        function getAuthHeaders() {
+            return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+        }
+
+        async function loadReports(url = `${API_BASE}/reports`) {
+            const container = document.getElementById('reports-container');
+            container.innerHTML = '<div class="loading">Loading reports...</div>';
+
+            try {
+                const response = await fetch(url, { headers: getAuthHeaders() });
+
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
+
+                const reports = await response.json();
+
+                document.getElementById('total-reports').textContent = reports.length;
+
+                const today = new Date().toISOString().split('T')[0];
+                const todayCount = reports.filter(r => r.createdAt && r.createdAt.startsWith(today)).length;
+                document.getElementById('today-reports').textContent = todayCount;
+
+                if (reports.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No active reports found.</p><a href="submit-report.html" class="btn btn-primary">Submit First Report</a></div>';
+                    return;
+                }
+
+                container.innerHTML = reports.map(report => `
+                    <div class="report-card">
+                        <div class="report-header">
+                            <span class="report-status status-${report.status}">${report.status.toUpperCase()}</span>
+                            <span class="report-date">${formatDate(report.dateLastSeen)}</span>
+                        </div>
+                        <div class="report-body">
+                            <h3>${report.childName}</h3>
+                            <div class="report-details">
+                                <span>👤 ${report.gender}, ${report.age} years old</span>
+                                <span>📍 ${report.lastSeenLocation}</span>
+                                <span>📝 ${report.physicalDescription}</span>
+                            </div>
+                        </div>
+                        <div class="report-footer">
+                            <span>Reported by: ${report.submittedBy}</span>
+                            <button class="btn btn-outline btn-sm" onclick="viewReport('${report.reportId}')">View Details</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                container.innerHTML = '<div class="error-state">Failed to load reports. Please refresh the page.</div>';
+            }
+        }
+
+        async function handleSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            const type = document.getElementById('search-type').value;
+
+            if (!query) {
+                loadReports();
+                return;
+            }
+
+            const url = `${API_BASE}/reports?${type}=${encodeURIComponent(query)}`;
+            loadReports(url);
+        }
+
+        function viewReport(id) {
+            window.location.href = `report-detail.html?id=${id}`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Load reports on page load
+        loadReports();
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# Maven build output
+target/
+*.class
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+
+# Kiro
+.kiro/
+
+# Environment and secrets - NEVER commit these
+application-prod.properties
+*.env
+.env
+
+# PostgreSQL password is in application.properties
+# We will use environment variables in production
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Uploaded images
+uploads/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
