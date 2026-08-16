@@ -26,4 +26,7 @@ public class ReportRequest {
 
     @NotBlank(message = "Date last seen is required")
     private String dateLastSeen;
+
+    // Optional - set after image is uploaded separately
+    private String imagePath;
 }

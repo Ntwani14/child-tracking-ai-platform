@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Details — Missing Children Reporting System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .detail-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .detail-banner {
+            background: linear-gradient(135deg, #1a3c6e, #2d6cdf);
+            padding: 32px;
+            color: white;
+        }
+
+        .detail-banner h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .detail-banner .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .detail-body {
+            padding: 32px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .detail-field label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .detail-field p {
+            font-size: 1rem;
+            color: #222;
+            font-weight: 500;
+        }
+
+        .detail-description {
+            background: #f8f9fa;
+            border-left: 4px solid #2d6cdf;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 28px;
+        }
+
+        .detail-description label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .detail-description p {
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .detail-footer {
+            padding: 20px 32px;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .no-image {
+            width: 100%;
+            height: 180px;
+            background: #f0f2f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+        }
+
+        .report-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 28px;
+        }
+
+        .share-section {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .share-section p {
+            margin-bottom: 12px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">🔍 Missing Children System</div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="submit-report.html">Report Missing Child</a>
+            <span class="nav-user" id="nav-user"></span>
+            <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <div style="margin-bottom: 20px;">
+            <a href="dashboard.html" class="btn btn-outline btn-sm">← Back to Dashboard</a>
+        </div>
+
+        <div id="loading" style="text-align:center; padding: 60px; color: #888;">Loading report details...</div>
+
+        <div id="report-container" class="hidden">
+            <div class="detail-card">
+
+                <div class="detail-banner">
+                    <span class="status-badge" id="report-status"></span>
+                    <h1 id="report-name"></h1>
+                    <p id="report-subtitle"></p>
+                </div>
+
+                <div class="detail-body">
+
+                    <!-- Photo -->
+                    <div id="image-container"></div>
+
+                    <!-- Details Grid -->
+                    <div class="detail-grid">
+                        <div class="detail-field">
+                            <label>Age</label>
+                            <p id="report-age"></p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Gender</label>
+                            <p id="report-gender"></p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Last Seen Location</label>
+                            <p id="report-location"></p>
+                        </div>
+                        <div class="detail-field">
+                            <label>Date Last Seen</label>
+                            <p id="report-date"></p>
+                        </div>
+                    </div>
+
+                    <!-- Physical Description -->
+                    <div class="detail-description">
+                        <label>Physical Description</label>
+                        <p id="report-description"></p>
+                    </div>
+
+                    <!-- Share Section -->
+                    <div class="share-section">
+                        <p>Help find this child — share this report with your community</p>
+                        <button class="btn btn-primary" onclick="shareReport()">Share Report</button>
+                    </div>
+
+                </div>
+
+                <div class="detail-footer">
+                    <span>Reported by: <strong id="report-submitter"></strong></span>
+                    <span>Report ID: <span id="report-id" style="font-family: monospace; font-size: 0.8rem;"></span></span>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="error-container" class="hidden" style="text-align:center; padding: 60px; color: #c62828;">
+            Report not found or you do not have permission to view it.
+            <br><br>
+            <a href="dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        const token = localStorage.getItem('token');
+
+        if (!token) window.location.href = 'login.html';
+
+        document.getElementById('nav-user').textContent = 'Welcome, ' + (localStorage.getItem('userName') || '');
+
+        // Get report ID from URL ?id=...
+        const urlParams = new URLSearchParams(window.location.search);
+        const reportId = urlParams.get('id');
+
+        if (!reportId) {
+            window.location.href = 'dashboard.html';
+        }
+
+        async function loadReport() {
+            try {
+                const response = await fetch(`${API_BASE}/reports/${reportId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('error-container').classList.remove('hidden');
+                    return;
+                }
+
+                const report = await response.json();
+
+                // Populate the page
+                document.getElementById('report-status').textContent = report.status.toUpperCase();
+                document.getElementById('report-name').textContent = report.childName;
+                document.getElementById('report-subtitle').textContent =
+                    `${report.gender} • ${report.age} years old • Last seen ${formatDate(report.dateLastSeen)}`;
+                document.getElementById('report-age').textContent = report.age + ' years old';
+                document.getElementById('report-gender').textContent = report.gender;
+                document.getElementById('report-location').textContent = report.lastSeenLocation;
+                document.getElementById('report-date').textContent = formatDate(report.dateLastSeen);
+                document.getElementById('report-description').textContent = report.physicalDescription;
+                document.getElementById('report-submitter').textContent = report.submittedBy;
+                document.getElementById('report-id').textContent = report.reportId;
+
+                // Image
+                const imageContainer = document.getElementById('image-container');
+                if (report.imagePath) {
+                    imageContainer.innerHTML = `<img src="${API_BASE}/images/${report.imagePath}" class="report-image" alt="Photo of ${report.childName}">`;
+                } else {
+                    imageContainer.innerHTML = `<div class="no-image">📷 No photo uploaded for this report</div>`;
+                }
+
+                // Show the report
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('report-container').classList.remove('hidden');
+
+            } catch (err) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error-container').classList.remove('hidden');
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function shareReport() {
+            const text = `MISSING CHILD ALERT: ${document.getElementById('report-name').textContent} — ` +
+                         `${document.getElementById('report-subtitle').textContent} — ` +
+                         `Last seen at ${document.getElementById('report-location').textContent}. ` +
+                         `Description: ${document.getElementById('report-description').textContent}. ` +
+                         `Please share and contact authorities if you have any information.`;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Report details copied to clipboard! You can now paste and share it.');
+                });
+            } else {
+                alert(text);
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        loadReport();
+    </script>
+</body>
+</html>

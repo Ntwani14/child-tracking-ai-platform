@@ -72,6 +72,14 @@
                         <input type="text" id="lastSeenLocation"
                             placeholder="e.g. Soshanguve Block H, near the school" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="photo">Photo of Child <span class="optional">(optional — JPG or PNG, max 5MB)</span></label>
+                        <input type="file" id="photo" accept="image/jpeg,image/png">
+                        <div id="image-preview" style="margin-top: 10px; display: none;">
+                            <img id="preview-img" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -98,6 +106,19 @@
         // Set max date to today
         document.getElementById('dateLastSeen').max = new Date().toISOString().split('T')[0];
 
+        // Image preview
+        document.getElementById('photo').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-img').src = e.target.result;
+                    document.getElementById('image-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         document.getElementById('report-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -110,16 +131,43 @@
             btn.textContent = 'Submitting...';
             btn.disabled = true;
 
-            const reportData = {
-                childName: document.getElementById('childName').value,
-                age: parseInt(document.getElementById('age').value),
-                gender: document.getElementById('gender').value,
-                physicalDescription: document.getElementById('physicalDescription').value,
-                lastSeenLocation: document.getElementById('lastSeenLocation').value,
-                dateLastSeen: document.getElementById('dateLastSeen').value
-            };
-
             try {
+                // Step 1: Upload image if one was selected
+                let imagePath = null;
+                const photoFile = document.getElementById('photo').files[0];
+
+                if (photoFile) {
+                    btn.textContent = 'Uploading photo...';
+                    const formData = new FormData();
+                    formData.append('file', photoFile);
+
+                    const uploadResponse = await fetch(`${API_BASE}/images/upload`, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token },
+                        body: formData
+                    });
+
+                    if (!uploadResponse.ok) {
+                        const uploadError = await uploadResponse.json();
+                        throw new Error(uploadError.error || 'Image upload failed');
+                    }
+
+                    const uploadData = await uploadResponse.json();
+                    imagePath = uploadData.filename;
+                }
+
+                // Step 2: Submit the report with optional image path
+                btn.textContent = 'Saving report...';
+                const reportData = {
+                    childName: document.getElementById('childName').value,
+                    age: parseInt(document.getElementById('age').value),
+                    gender: document.getElementById('gender').value,
+                    physicalDescription: document.getElementById('physicalDescription').value,
+                    lastSeenLocation: document.getElementById('lastSeenLocation').value,
+                    dateLastSeen: document.getElementById('dateLastSeen').value,
+                    imagePath: imagePath
+                };
+
                 const response = await fetch(`${API_BASE}/reports`, {
                     method: 'POST',
                     headers: {
@@ -135,19 +183,16 @@
                     successDiv.textContent = `Report submitted successfully for ${data.childName}. Report ID: ${data.reportId}`;
                     successDiv.classList.remove('hidden');
                     document.getElementById('report-form').reset();
+                    document.getElementById('image-preview').style.display = 'none';
                     btn.textContent = 'Submit Report';
                     btn.disabled = false;
-
-                    // Redirect to dashboard after 2 seconds
                     setTimeout(() => window.location.href = 'dashboard.html', 2000);
                 } else {
-                    errorDiv.textContent = data.error || 'Failed to submit report. Please try again.';
-                    errorDiv.classList.remove('hidden');
-                    btn.textContent = 'Submit Report';
-                    btn.disabled = false;
+                    throw new Error(data.error || 'Failed to submit report');
                 }
+
             } catch (err) {
-                errorDiv.textContent = 'Could not connect to the server.';
+                errorDiv.textContent = err.message || 'Could not connect to the server.';
                 errorDiv.classList.remove('hidden');
                 btn.textContent = 'Submit Report';
                 btn.disabled = false;

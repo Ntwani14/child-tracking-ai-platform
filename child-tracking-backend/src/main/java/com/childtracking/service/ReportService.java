@@ -37,6 +37,7 @@ public class ReportService {
         report.setLastSeenLocation(request.getLastSeenLocation());
         report.setDateLastSeen(LocalDate.parse(request.getDateLastSeen()));
         report.setStatus("active");
+        report.setImagePath(request.getImagePath());
         report.setSubmittedBy(user);
 
         Report saved = reportRepository.save(report);
