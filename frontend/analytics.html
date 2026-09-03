@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics — Missing Children Reporting System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .stat-big {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+        .stat-big .number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1a3c6e;
+        }
+        .stat-big .label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        .stat-big.green .number { color: #2e7d32; }
+        .stat-big.orange .number { color: #e65100; }
+        .stat-big.red .number { color: #c62828; }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .chart-card h3 {
+            font-size: 1rem;
+            color: #1a3c6e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8eef8;
+        }
+        .chart-full {
+            grid-column: 1 / -1;
+        }
+        @media (max-width: 768px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🔍 Missing Children System</div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="submit-report.html">Report Missing Child</a>
+            <a href="analytics.html" class="active">Analytics</a>
+            <span class="nav-user" id="nav-user"></span>
+            <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div style="margin-bottom: 24px;">
+            <h2 style="color: #1a3c6e; font-size: 1.5rem;">Reporting Trends & Analytics</h2>
+            <p style="color: #666; font-size: 0.9rem;">Overview of missing children reports across all locations and time periods</p>
+        </div>
+
+        <div id="loading" style="text-align:center; padding: 60px; color: #888;">Loading analytics...</div>
+
+        <div id="analytics-content" class="hidden">
+
+            <!-- Summary Stats -->
+            <div class="analytics-grid" id="stats-grid"></div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card chart-full">
+                    <h3>📅 Reports by Month</h3>
+                    <canvas id="monthChart" height="80"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>📍 Top Locations</h3>
+                    <canvas id="locationChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>👤 Gender Breakdown</h3>
+                    <canvas id="genderChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>🎂 Age Groups</h3>
+                    <canvas id="ageChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>📊 Report Status</h3>
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+        document.getElementById('nav-user').textContent = 'Welcome, ' + (localStorage.getItem('userName') || '');
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch(`${API_BASE}/analytics/trends`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('analytics-content').classList.remove('hidden');
+
+                // Summary stats
+                document.getElementById('stats-grid').innerHTML = `
+                    <div class="stat-big">
+                        <div class="number">${data.totalReports}</div>
+                        <div class="label">Total Reports</div>
+                    </div>
+                    <div class="stat-big green">
+                        <div class="number">${data.totalActive}</div>
+                        <div class="label">Active Cases</div>
+                    </div>
+                    <div class="stat-big orange">
+                        <div class="number">${data.totalFound}</div>
+                        <div class="label">Children Found</div>
+                    </div>
+                    <div class="stat-big red">
+                        <div class="number">${data.totalDuplicate}</div>
+                        <div class="label">Duplicate Reports</div>
+                    </div>
+                `;
+
+                const colors = ['#2d6cdf','#e65100','#2e7d32','#c62828','#7b1fa2','#0097a7','#f57c00','#455a64'];
+
+                // Month chart
+                new Chart(document.getElementById('monthChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.byMonth),
+                        datasets: [{
+                            label: 'Reports',
+                            data: Object.values(data.byMonth),
+                            backgroundColor: '#2d6cdf',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } } }
+                });
+
+                // Location chart
+                new Chart(document.getElementById('locationChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.byLocation),
+                        datasets: [{
+                            label: 'Reports',
+                            data: Object.values(data.byLocation),
+                            backgroundColor: colors,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // Gender chart
+                new Chart(document.getElementById('genderChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(data.byGender),
+                        datasets: [{
+                            data: Object.values(data.byGender),
+                            backgroundColor: ['#2d6cdf','#e91e63','#9c27b0']
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+                // Age chart
+                new Chart(document.getElementById('ageChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.byAgeGroup),
+                        datasets: [{
+                            label: 'Reports',
+                            data: Object.values(data.byAgeGroup),
+                            backgroundColor: ['#2e7d32','#1565c0','#e65100','#c62828'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } } }
+                });
+
+                // Status chart
+                new Chart(document.getElementById('statusChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Active', 'Found', 'Duplicate'],
+                        datasets: [{
+                            data: [data.totalActive, data.totalFound, data.totalDuplicate],
+                            backgroundColor: ['#2d6cdf','#2e7d32','#e65100']
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+            } catch (err) {
+                document.getElementById('loading').textContent = 'Failed to load analytics. Make sure the server is running.';
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        loadAnalytics();
+    </script>
+</body>
+</html>

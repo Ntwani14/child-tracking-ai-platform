@@ -17,18 +17,20 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final AiDuplicateService aiDuplicateService;
 
-    public ReportService(ReportRepository reportRepository, UserRepository userRepository) {
+    public ReportService(ReportRepository reportRepository,
+                         UserRepository userRepository,
+                         AiDuplicateService aiDuplicateService) {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
+        this.aiDuplicateService = aiDuplicateService;
     }
 
     public ReportResponse submitReport(ReportRequest request, String userEmail) {
-        // Find the user submitting the report
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Build the report entity
         Report report = new Report();
         report.setChildName(request.getChildName());
         report.setAge(request.getAge());
@@ -41,6 +43,10 @@ public class ReportService {
         report.setSubmittedBy(user);
 
         Report saved = reportRepository.save(report);
+
+        // Trigger AI duplicate detection asynchronously
+        aiDuplicateService.checkForDuplicate(saved);
+
         return mapToResponse(saved);
     }
 

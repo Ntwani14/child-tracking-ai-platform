@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — Missing Children Reporting System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .flag-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            overflow: hidden;
+            border-left: 4px solid #e65100;
+        }
+        .flag-header {
+            background: #fff3e0;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flag-header .score {
+            font-weight: 700;
+            color: #e65100;
+            font-size: 1.1rem;
+        }
+        .flag-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+        .report-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .report-box h4 {
+            font-size: 1rem;
+            color: #1a3c6e;
+            margin-bottom: 8px;
+        }
+        .report-box p {
+            font-size: 0.85rem;
+            color: #555;
+            margin: 3px 0;
+        }
+        .vs-badge {
+            text-align: center;
+            font-weight: 700;
+            color: #e65100;
+            font-size: 1.2rem;
+        }
+        .flag-actions {
+            padding: 14px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn-danger {
+            background: #c62828;
+            color: white;
+            border: none;
+        }
+        .btn-danger:hover { background: #b71c1c; }
+        .btn-success {
+            background: #2e7d32;
+            color: white;
+            border: none;
+        }
+        .btn-success:hover { background: #1b5e20; }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .badge-count {
+            background: #e65100;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🔍 Missing Children System</div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="submit-report.html">Report Missing Child</a>
+            <a href="analytics.html">Analytics</a>
+            <a href="admin.html" class="active">Admin</a>
+            <span class="nav-user" id="nav-user"></span>
+            <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="section-header">
+            <div>
+                <h2 style="color:#1a3c6e; font-size:1.5rem;">Admin Panel</h2>
+                <p style="color:#666; font-size:0.9rem;">Review AI-flagged duplicate reports and manage case statuses</p>
+            </div>
+        </div>
+
+        <!-- Duplicate Flags Section -->
+        <div style="margin-bottom: 40px;">
+            <div class="section-header">
+                <h3 style="color:#1a3c6e;">⚠️ Pending Duplicate Flags <span class="badge-count" id="flag-count">0</span></h3>
+                <button class="btn btn-outline btn-sm" onclick="loadFlags()">Refresh</button>
+            </div>
+
+            <div id="flags-container">
+                <div class="loading">Loading duplicate flags...</div>
+            </div>
+        </div>
+
+        <!-- All Reports Section -->
+        <div>
+            <h3 style="color:#1a3c6e; margin-bottom: 20px;">📋 All Reports — Update Status</h3>
+            <div id="reports-container">
+                <div class="loading">Loading reports...</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+        document.getElementById('nav-user').textContent = 'Welcome, ' + (localStorage.getItem('userName') || '');
+
+        function getHeaders() {
+            return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+        }
+
+        async function loadFlags() {
+            const container = document.getElementById('flags-container');
+            try {
+                const response = await fetch(`${API_BASE}/admin/duplicate-flags`, { headers: getHeaders() });
+                const flags = await response.json();
+
+                document.getElementById('flag-count').textContent = flags.length;
+
+                if (flags.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>✅ No pending duplicate flags. All reports have been reviewed.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = flags.map(flag => `
+                    <div class="flag-card" id="flag-${flag.flagId}">
+                        <div class="flag-header">
+                            <span>🤖 AI detected <strong>${Math.round(flag.similarityScore * 100)}% similarity</strong> between these two reports</span>
+                            <span class="score">${Math.round(flag.similarityScore * 100)}% match</span>
+                        </div>
+                        <div class="flag-body">
+                            <div class="report-box">
+                                <h4>New Report</h4>
+                                <p><strong>${flag.report.childName}</strong></p>
+                                <p>👤 ${flag.report.gender}, ${flag.report.age} years old</p>
+                                <p>📍 ${flag.report.lastSeenLocation}</p>
+                                <p>Status: <span class="report-status status-${flag.report.status}">${flag.report.status.toUpperCase()}</span></p>
+                            </div>
+                            <div class="vs-badge">VS</div>
+                            <div class="report-box">
+                                <h4>Existing Report</h4>
+                                <p><strong>${flag.matchedReport.childName}</strong></p>
+                                <p>👤 ${flag.matchedReport.gender}, ${flag.matchedReport.age} years old</p>
+                                <p>📍 ${flag.matchedReport.lastSeenLocation}</p>
+                                <p>Status: <span class="report-status status-${flag.matchedReport.status}">${flag.matchedReport.status.toUpperCase()}</span></p>
+                            </div>
+                        </div>
+                        <div class="flag-actions">
+                            <button class="btn btn-outline btn-sm" onclick="dismissFlag('${flag.flagId}')">
+                                ✓ Not a Duplicate — Dismiss
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="mergeFlag('${flag.flagId}')">
+                                ⚠ Confirm Duplicate — Mark & Remove
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = '<div class="error-state">Failed to load duplicate flags.</div>';
+            }
+        }
+
+        async function dismissFlag(flagId) {
+            if (!confirm('Dismiss this flag? The report will remain active.')) return;
+            await fetch(`${API_BASE}/admin/duplicate-flags/${flagId}/dismiss`, {
+                method: 'PUT', headers: getHeaders()
+            });
+            loadFlags();
+        }
+
+        async function mergeFlag(flagId) {
+            if (!confirm('Confirm as duplicate? The new report will be marked as DUPLICATE and hidden from active cases.')) return;
+            await fetch(`${API_BASE}/admin/duplicate-flags/${flagId}/merge`, {
+                method: 'PUT', headers: getHeaders()
+            });
+            loadFlags();
+            loadReports();
+        }
+
+        async function updateStatus(reportId, status) {
+            if (!confirm(`Change report status to "${status}"?`)) return;
+            await fetch(`${API_BASE}/admin/reports/${reportId}/status`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify({ status })
+            });
+            loadReports();
+        }
+
+        async function loadReports() {
+            const container = document.getElementById('reports-container');
+            try {
+                const response = await fetch(`${API_BASE}/reports`, { headers: getHeaders() });
+                const reports = await response.json();
+
+                if (reports.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No reports found.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = `<table style="width:100%; background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-collapse:collapse;">
+                    <thead style="background:#1a3c6e; color:white;">
+                        <tr>
+                            <th style="padding:12px 16px; text-align:left;">Child Name</th>
+                            <th style="padding:12px 16px; text-align:left;">Age</th>
+                            <th style="padding:12px 16px; text-align:left;">Location</th>
+                            <th style="padding:12px 16px; text-align:left;">Status</th>
+                            <th style="padding:12px 16px; text-align:left;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${reports.map((r, i) => `
+                        <tr style="border-bottom:1px solid #eee; background:${i % 2 === 0 ? 'white' : '#f8f9fa'}">
+                            <td style="padding:12px 16px;">${r.childName}</td>
+                            <td style="padding:12px 16px;">${r.age}</td>
+                            <td style="padding:12px 16px;">${r.lastSeenLocation}</td>
+                            <td style="padding:12px 16px;"><span class="report-status status-${r.status}">${r.status.toUpperCase()}</span></td>
+                            <td style="padding:12px 16px;">
+                                <select onchange="updateStatus('${r.reportId}', this.value)" style="padding:4px 8px; border:1px solid #ddd; border-radius:6px; font-size:0.85rem;">
+                                    <option value="">Change status...</option>
+                                    <option value="active" ${r.status === 'active' ? 'disabled' : ''}>Active</option>
+                                    <option value="found" ${r.status === 'found' ? 'disabled' : ''}>Found ✓</option>
+                                    <option value="duplicate" ${r.status === 'duplicate' ? 'disabled' : ''}>Duplicate</option>
+                                </select>
+                            </td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+            } catch (err) {
+                container.innerHTML = '<div class="error-state">Failed to load reports.</div>';
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        loadFlags();
+        loadReports();
+    </script>
+</body>
+</html>
