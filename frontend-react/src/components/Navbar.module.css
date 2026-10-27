@@ -1,0 +1,40 @@
+﻿.navbar {
+  background: linear-gradient(135deg, #1a3c6e 0%, #1e4a85 100%);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brandIcon { font-size: 1.4rem; }
+.brandText { color: white; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+.navLinks { display: flex; align-items: center; gap: 4px; }
+.link { color: rgba(255,255,255,0.75); padding: 8px 14px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; transition: all 0.2s; }
+.link:hover, .active { background: rgba(255,255,255,0.15); color: white; }
+.notifWrap { position: relative; }
+.bell { background: none; border: none; color: rgba(255,255,255,0.8); font-size: 1.2rem; padding: 8px; border-radius: 8px; position: relative; transition: all 0.2s; }
+.bell:hover { background: rgba(255,255,255,0.1); color: white; }
+.badge { position: absolute; top: 2px; right: 2px; background: #e65100; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.notifPanel { position: absolute; right: 0; top: 48px; width: 360px; background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); overflow: hidden; max-height: 400px; overflow-y: auto; }
+.notifHeader { padding: 14px 18px; font-weight: 700; color: #1a3c6e; border-bottom: 1px solid #eee; }
+.notifItem { padding: 12px 18px; border-bottom: 1px solid #f0f2f5; cursor: pointer; transition: background 0.15s; }
+.notifItem:hover { background: #f8f9fa; }
+.notifMsg { font-size: 0.83rem; color: #333; line-height: 1.4; }
+.notifTime { font-size: 0.72rem; color: #aaa; margin-top: 4px; }
+.notifEmpty { padding: 24px; text-align: center; color: #aaa; font-size: 0.88rem; }
+.userName { color: rgba(255,255,255,0.7); font-size: 0.83rem; padding: 0 8px; }
+.logoutBtn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 7px 16px; border-radius: 8px; font-size: 0.83rem; font-weight: 600; transition: all 0.2s; }
+.logoutBtn:hover { background: rgba(255,255,255,0.2); }
+.hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; padding: 8px; }
+.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+  .navLinks { display: none; flex-direction: column; position: absolute; top: 64px; left: 0; right: 0; background: #1a3c6e; padding: 16px; gap: 8px; }
+  .navLinks.open { display: flex; }
+  .notifPanel { right: -80px; width: 300px; }
+}

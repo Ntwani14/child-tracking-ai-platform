@@ -5,10 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — Missing Children Reporting System</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .notif-panel {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: 360px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            z-index: 200;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .notif-header {
+            padding: 14px 18px;
+            font-weight: 700;
+            color: #1a3c6e;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+        .notif-item {
+            padding: 12px 18px;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 0.85rem;
+            color: #444;
+            cursor: pointer;
+        }
+        .notif-item:hover { background: #f8f9fa; }
+        .notif-item .notif-time {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 4px;
+        }
+        .notif-empty {
+            padding: 24px 18px;
+            color: #aaa;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .bell-wrap {
+            position: relative;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+        }
+        .bell-wrap:hover { background: rgba(255,255,255,0.1); }
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .filter-row select, .filter-row input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            background: white;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-brand">🔍 Missing Children System</div>
         <div class="nav-links">
@@ -17,14 +79,20 @@
             <a href="analytics.html">Analytics</a>
             <a href="admin.html">Admin</a>
             <span class="nav-user" id="nav-user"></span>
+            <div class="bell-wrap" onclick="toggleNotifications()">
+                🔔
+                <span id="notif-count" style="background:#e65100;color:white;border-radius:50%;padding:1px 6px;font-size:0.72rem;display:none;position:absolute;top:-4px;right:-4px;">0</span>
+                <div class="notif-panel" id="notif-panel">
+                    <div class="notif-header">🔔 Notifications</div>
+                    <div id="notif-list"><div class="notif-empty">Loading...</div></div>
+                </div>
+            </div>
             <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="main-content">
 
-        <!-- Stats Bar -->
         <div class="stats-bar">
             <div class="stat-card">
                 <span class="stat-number" id="total-reports">0</span>
@@ -34,9 +102,12 @@
                 <span class="stat-number" id="today-reports">0</span>
                 <span class="stat-label">Reported Today</span>
             </div>
+            <div class="stat-card">
+                <span class="stat-number" id="notif-stat">0</span>
+                <span class="stat-label">Your Alerts</span>
+            </div>
         </div>
 
-        <!-- Search Bar -->
         <div class="search-section">
             <h2>Active Missing Children Reports</h2>
             <div class="search-bar">
@@ -48,12 +119,22 @@
                 <button class="btn btn-primary" onclick="handleSearch()">Search</button>
                 <button class="btn btn-outline" onclick="loadReports()">Show All</button>
             </div>
+            <div class="filter-row">
+                <select id="filter-gender" onchange="applyFilters()">
+                    <option value="">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <select id="filter-status" onchange="applyFilters()">
+                    <option value="active">Active Only</option>
+                    <option value="">All Statuses</option>
+                </select>
+                <input type="number" id="filter-age-min" placeholder="Min age" min="0" max="18" onchange="applyFilters()" style="width:100px;">
+                <input type="number" id="filter-age-max" placeholder="Max age" min="0" max="18" onchange="applyFilters()" style="width:100px;">
+            </div>
         </div>
 
-        <!-- Alert Message -->
         <div id="alert-message" class="alert hidden"></div>
-
-        <!-- Reports Grid -->
         <div id="reports-container" class="reports-grid">
             <div class="loading">Loading reports...</div>
         </div>
@@ -62,15 +143,12 @@
 
     <script>
         const API_BASE = 'http://localhost:8080/api';
-
-        // Check authentication
         const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'login.html';
-        }
+        if (!token) window.location.href = 'login.html';
 
-        // Show logged in user name
         document.getElementById('nav-user').textContent = 'Welcome, ' + (localStorage.getItem('userName') || '');
+
+        let allReports = [];
 
         function getAuthHeaders() {
             return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
@@ -82,63 +160,122 @@
 
             try {
                 const response = await fetch(url, { headers: getAuthHeaders() });
+                if (response.status === 401) { logout(); return; }
 
-                if (response.status === 401) {
-                    logout();
-                    return;
-                }
-
-                const reports = await response.json();
-
-                document.getElementById('total-reports').textContent = reports.length;
-
-                const today = new Date().toISOString().split('T')[0];
-                const todayCount = reports.filter(r => r.createdAt && r.createdAt.startsWith(today)).length;
-                document.getElementById('today-reports').textContent = todayCount;
-
-                if (reports.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><p>No active reports found.</p><a href="submit-report.html" class="btn btn-primary">Submit First Report</a></div>';
-                    return;
-                }
-
-                container.innerHTML = reports.map(report => `
-                    <div class="report-card">
-                        <div class="report-header">
-                            <span class="report-status status-${report.status}">${report.status.toUpperCase()}</span>
-                            <span class="report-date">${formatDate(report.dateLastSeen)}</span>
-                        </div>
-                        <div class="report-body">
-                            <h3>${report.childName}</h3>
-                            <div class="report-details">
-                                <span>👤 ${report.gender}, ${report.age} years old</span>
-                                <span>📍 ${report.lastSeenLocation}</span>
-                                <span>📝 ${report.physicalDescription}</span>
-                            </div>
-                        </div>
-                        <div class="report-footer">
-                            <span>Reported by: ${report.submittedBy}</span>
-                            <button class="btn btn-outline btn-sm" onclick="viewReport('${report.reportId}')">View Details</button>
-                        </div>
-                    </div>
-                `).join('');
+                allReports = await response.json();
+                applyFilters();
 
             } catch (err) {
                 container.innerHTML = '<div class="error-state">Failed to load reports. Please refresh the page.</div>';
             }
         }
 
+        function applyFilters() {
+            const gender = document.getElementById('filter-gender').value;
+            const status = document.getElementById('filter-status').value;
+            const minAge = parseInt(document.getElementById('filter-age-min').value) || 0;
+            const maxAge = parseInt(document.getElementById('filter-age-max').value) || 18;
+
+            let filtered = allReports.filter(r => {
+                if (gender && r.gender !== gender) return false;
+                if (status && r.status !== status) return false;
+                if (r.age < minAge || r.age > maxAge) return false;
+                return true;
+            });
+
+            renderReports(filtered);
+        }
+
+        function renderReports(reports) {
+            const container = document.getElementById('reports-container');
+
+            const active = reports.filter(r => r.status === 'active');
+            document.getElementById('total-reports').textContent = active.length;
+
+            const today = new Date().toISOString().split('T')[0];
+            const todayCount = reports.filter(r => r.createdAt && r.createdAt.startsWith(today)).length;
+            document.getElementById('today-reports').textContent = todayCount;
+
+            if (reports.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No reports found matching your filters.</p><a href="submit-report.html" class="btn btn-primary">Submit a Report</a></div>';
+                return;
+            }
+
+            container.innerHTML = reports.map(report => `
+                <div class="report-card">
+                    <div class="report-header">
+                        <span class="report-status status-${report.status}">${report.status.toUpperCase()}</span>
+                        <span class="report-date">${formatDate(report.dateLastSeen)}</span>
+                    </div>
+                    <div class="report-body">
+                        <h3>${report.childName}</h3>
+                        <div class="report-details">
+                            <span>👤 ${report.gender}, ${report.age} years old</span>
+                            <span>📍 ${report.lastSeenLocation}</span>
+                            <span>📝 ${report.physicalDescription}</span>
+                        </div>
+                    </div>
+                    <div class="report-footer">
+                        <span>Reported by: ${report.submittedBy}</span>
+                        <button class="btn btn-outline btn-sm" onclick="viewReport('${report.reportId}')">View Details</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         async function handleSearch() {
             const query = document.getElementById('search-input').value.trim();
             const type = document.getElementById('search-type').value;
 
-            if (!query) {
-                loadReports();
-                return;
-            }
+            if (!query) { loadReports(); return; }
 
             const url = `${API_BASE}/reports?${type}=${encodeURIComponent(query)}`;
             loadReports(url);
         }
+
+        // Notifications
+        async function loadNotifications() {
+            try {
+                const response = await fetch(`${API_BASE}/notifications`, { headers: getAuthHeaders() });
+                if (!response.ok) return;
+                const notifications = await response.json();
+
+                const count = notifications.length;
+                document.getElementById('notif-stat').textContent = count;
+
+                if (count > 0) {
+                    document.getElementById('notif-count').textContent = count;
+                    document.getElementById('notif-count').style.display = 'inline';
+                }
+
+                const list = document.getElementById('notif-list');
+                if (notifications.length === 0) {
+                    list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+                    return;
+                }
+
+                list.innerHTML = notifications.map(n => `
+                    <div class="notif-item" onclick="viewReport('${n.reportId}')">
+                        <div>${n.message}</div>
+                        <div class="notif-time">${formatDateTime(n.sentAt)}</div>
+                    </div>
+                `).join('');
+
+            } catch (err) { /* notifications optional */ }
+        }
+
+        function toggleNotifications() {
+            const panel = document.getElementById('notif-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Close notifications when clicking outside
+        document.addEventListener('click', function(e) {
+            const bell = document.querySelector('.bell-wrap');
+            if (bell && !bell.contains(e.target)) {
+                document.getElementById('notif-panel').style.display = 'none';
+            }
+        });
 
         function viewReport(id) {
             window.location.href = `report-detail.html?id=${id}`;
@@ -146,8 +283,12 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return '';
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
+            return new Date(dateStr).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '';
+            return new Date(dateStr).toLocaleString('en-ZA');
         }
 
         function logout() {
@@ -155,8 +296,8 @@
             window.location.href = 'login.html';
         }
 
-        // Load reports on page load
         loadReports();
+        loadNotifications();
     </script>
 </body>
 </html>

@@ -18,13 +18,16 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final AiDuplicateService aiDuplicateService;
+    private final NotificationService notificationService;
 
     public ReportService(ReportRepository reportRepository,
                          UserRepository userRepository,
-                         AiDuplicateService aiDuplicateService) {
+                         AiDuplicateService aiDuplicateService,
+                         NotificationService notificationService) {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
         this.aiDuplicateService = aiDuplicateService;
+        this.notificationService = notificationService;
     }
 
     public ReportResponse submitReport(ReportRequest request, String userEmail) {
@@ -44,8 +47,11 @@ public class ReportService {
 
         Report saved = reportRepository.save(report);
 
-        // Trigger AI duplicate detection asynchronously
+        // Trigger AI duplicate detection
         aiDuplicateService.checkForDuplicate(saved);
+
+        // Send alert notifications to relevant users
+        notificationService.sendAlertNotifications(saved);
 
         return mapToResponse(saved);
     }
@@ -77,7 +83,6 @@ public class ReportService {
         return mapToResponse(report);
     }
 
-    // Map Report entity to ReportResponse DTO
     private ReportResponse mapToResponse(Report report) {
         ReportResponse response = new ReportResponse();
         response.setReportId(report.getReportId().toString());

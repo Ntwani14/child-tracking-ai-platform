@@ -86,7 +86,7 @@ def get_existing_reports(exclude_report_id: str):
 
 # ---- Core Duplicate Detection Logic ----
 
-def detect_duplicate(new_report_text: str, existing_reports: list, threshold: float = 0.75):
+def detect_duplicate(new_report_text: str, existing_reports: list, threshold: float = 0.25):
     """
     Compare new report text against all existing reports using TF-IDF and cosine similarity.
     Returns the highest match and its similarity score.

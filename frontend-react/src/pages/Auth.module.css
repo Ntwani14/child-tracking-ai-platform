@@ -1,0 +1,20 @@
+﻿.page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a3c6e 0%, #2d6cdf 100%); padding: 24px; }
+.container { width: 100%; max-width: 440px; }
+.logo { text-align: center; color: white; margin-bottom: 28px; }
+.logoIcon { font-size: 3rem; margin-bottom: 10px; }
+.logo h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+.logo p { opacity: 0.8; font-size: 0.9rem; }
+.card { background: white; border-radius: 16px; padding: 36px; box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
+.card h2 { font-size: 1.5rem; color: #1a3c6e; margin-bottom: 6px; }
+.subtitle { color: #6b7280; font-size: 0.88rem; margin-bottom: 24px; }
+.error { background: #fff0f0; color: #c62828; border: 1px solid #ffcdd2; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.field input { width: 100%; padding: 11px 14px; border: 1.5px solid #e0e4ed; border-radius: 8px; font-size: 0.95rem; transition: border-color 0.2s; }
+.field input:focus { outline: none; border-color: #2d6cdf; box-shadow: 0 0 0 3px rgba(45,108,223,0.1); }
+.optional { font-weight: 400; color: #9ca3af; font-size: 0.8rem; }
+.btn { width: 100%; padding: 12px; background: #2d6cdf; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; margin-top: 8px; transition: all 0.2s; }
+.btn:hover:not(:disabled) { background: #1a5bc8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,108,223,0.3); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.footer { text-align: center; margin-top: 20px; font-size: 0.88rem; color: #6b7280; }
+.footer a { color: #2d6cdf; font-weight: 600; }

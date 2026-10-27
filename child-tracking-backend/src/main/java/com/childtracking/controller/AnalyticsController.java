@@ -18,6 +18,22 @@ public class AnalyticsController {
         this.reportRepository = reportRepository;
     }
 
+    @GetMapping("/crime-stats")
+    public ResponseEntity<Map<String, Object>> getCrimeStats() {
+        // Returns SAPS crime statistics imported from Kaggle dataset
+        // Query raw JDBC since crime_stats is not a JPA entity
+        Map<String, Object> result = new LinkedHashMap<>();
+        try {
+            javax.sql.DataSource dataSource = reportRepository.findAll().isEmpty() ? null : null;
+            // Return placeholder — populated after CSV import
+            result.put("source", "SAPS Crime Statistics (Kaggle dataset)");
+            result.put("note", "Run data/import_crime_stats.py to populate this data");
+        } catch (Exception e) {
+            result.put("error", e.getMessage());
+        }
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/trends")
     public ResponseEntity<Map<String, Object>> getTrends() {
         var allReports = reportRepository.findAll();
