@@ -1,0 +1,94 @@
+.page { min-height: 100vh; background: #f0f2f5; }
+
+/* Navbar */
+.nav { background: rgba(26,60,110,0.97); backdrop-filter: blur(10px); padding: 0 48px; height: 68px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.15); }
+.navBrand { display: flex; align-items: center; gap: 10px; color: white; font-size: 1.1rem; font-weight: 700; }
+.navIcon { font-size: 1.4rem; }
+.navLinks { display: flex; align-items: center; gap: 12px; }
+.navLogin { color: rgba(255,255,255,0.85); padding: 8px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; transition: all 0.2s; }
+.navLogin:hover { background: rgba(255,255,255,0.1); color: white; }
+.navRegister { background: #2d6cdf; color: white; padding: 8px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; transition: all 0.2s; }
+.navRegister:hover { background: #1a5bc8; transform: translateY(-1px); }
+
+/* Hero */
+.hero { background: linear-gradient(135deg, #0d1f3c 0%, #1a3c6e 50%, #1e4a85 100%); min-height: 90vh; display: flex; align-items: center; padding: 80px 48px; gap: 60px; }
+.heroContent { flex: 1; max-width: 600px; }
+.heroBadge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); padding: 6px 16px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.15); }
+.heroTitle { font-size: 3.2rem; font-weight: 800; color: white; line-height: 1.15; margin-bottom: 20px; letter-spacing: -0.5px; }
+.heroAccent { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.heroSub { color: rgba(255,255,255,0.75); font-size: 1.05rem; line-height: 1.7; margin-bottom: 36px; }
+.heroStats { display: flex; align-items: center; gap: 24px; margin-bottom: 40px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px 24px; }
+.heroStat { text-align: center; }
+.heroStatNum { display: block; font-size: 1.6rem; font-weight: 800; color: white; }
+.heroStatLabel { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-top: 3px; }
+.heroStatDiv { width: 1px; height: 40px; background: rgba(255,255,255,0.15); }
+.heroCTA { display: flex; gap: 14px; flex-wrap: wrap; }
+.ctaPrimary { background: linear-gradient(135deg, #2d6cdf, #1a5bc8); color: white; padding: 14px 32px; border-radius: 10px; font-size: 0.95rem; font-weight: 700; transition: all 0.2s; box-shadow: 0 4px 20px rgba(45,108,223,0.4); }
+.ctaPrimary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(45,108,223,0.5); }
+.ctaSecondary { background: rgba(255,255,255,0.1); color: white; border: 1.5px solid rgba(255,255,255,0.25); padding: 14px 32px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; transition: all 0.2s; }
+.ctaSecondary:hover { background: rgba(255,255,255,0.18); }
+
+/* Hero Visual */
+.heroVisual { flex-shrink: 0; }
+.heroCard { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 24px; width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.heroCardHeader { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; margin-bottom: 20px; }
+.liveIndicator { animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.mockReport { display: flex; align-items: center; gap: 14px; background: rgba(255,255,255,0.06); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+.mockAvatar { font-size: 1.8rem; }
+.mockName { font-weight: 700; color: white; font-size: 0.9rem; margin-bottom: 3px; }
+.mockDetail { color: rgba(255,255,255,0.55); font-size: 0.75rem; margin-bottom: 5px; }
+.mockBadge { display: inline-block; background: rgba(46,125,50,0.25); color: #4caf50; border-radius: 4px; padding: 2px 8px; font-size: 0.68rem; font-weight: 700; }
+.mockBadgeFound { display: inline-block; background: rgba(21,101,192,0.25); color: #64b5f6; border-radius: 4px; padding: 2px 8px; font-size: 0.68rem; font-weight: 700; }
+.heroCardFooter { margin-top: 16px; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.75rem; }
+
+/* Features */
+.features { padding: 100px 48px; background: white; }
+.featuresInner { max-width: 1100px; margin: 0 auto; }
+.featuresTitle { font-size: 2.2rem; font-weight: 800; color: #1a1a2e; text-align: center; margin-bottom: 12px; }
+.featuresSub { color: #6b7280; text-align: center; font-size: 1rem; margin-bottom: 60px; }
+.featureGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.featureCard { background: #f8f9fa; border-radius: 16px; padding: 28px; transition: all 0.2s; border: 1.5px solid transparent; }
+.featureCard:hover { border-color: #2d6cdf; background: #f0f5ff; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(45,108,223,0.1); }
+.featureIcon { font-size: 2rem; margin-bottom: 16px; }
+.featureCard h3 { font-size: 1.05rem; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+.featureCard p { color: #6b7280; font-size: 0.88rem; line-height: 1.6; }
+
+/* How it works */
+.howItWorks { padding: 100px 48px; background: #f0f2f5; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
+.step { text-align: center; }
+.stepNum { width: 52px; height: 52px; background: linear-gradient(135deg, #1a3c6e, #2d6cdf); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; margin: 0 auto 16px; box-shadow: 0 4px 16px rgba(45,108,223,0.3); }
+.step h3 { font-size: 1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+.step p { color: #6b7280; font-size: 0.85rem; line-height: 1.6; }
+
+/* CTA Banner */
+.ctaBanner { background: linear-gradient(135deg, #1a3c6e, #2d6cdf); padding: 80px 48px; text-align: center; }
+.ctaBanner h2 { font-size: 2rem; font-weight: 800; color: white; margin-bottom: 12px; }
+.ctaBanner p { color: rgba(255,255,255,0.8); font-size: 1rem; margin-bottom: 32px; }
+
+/* Footer */
+.footer { background: #0d1f3c; padding: 48px; }
+.footerContent { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+.footerBrand { color: white; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+.footerDesc { color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-top: 4px; }
+.footerLinks { display: flex; gap: 24px; }
+.footerLinks a { color: rgba(255,255,255,0.5); font-size: 0.85rem; transition: color 0.2s; }
+.footerLinks a:hover { color: white; }
+.footerBottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; display: flex; justify-content: space-between; color: rgba(255,255,255,0.3); font-size: 0.78rem; }
+
+@media (max-width: 900px) {
+  .hero { flex-direction: column; padding: 60px 24px; }
+  .heroTitle { font-size: 2.2rem; }
+  .heroVisual { display: none; }
+  .featureGrid { grid-template-columns: 1fr 1fr; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .heroStats { flex-direction: column; gap: 16px; }
+  .heroStatDiv { width: 100%; height: 1px; }
+}
+@media (max-width: 600px) {
+  .featureGrid { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr; }
+  .nav { padding: 0 20px; }
+  .features, .howItWorks, .ctaBanner, .footer { padding: 60px 24px; }
+}

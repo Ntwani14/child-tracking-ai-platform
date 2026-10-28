@@ -1,7 +1,7 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import styles from "./Auth.module.css";
+import styles from "./AuthNew.module.css";
 
 export default function Login() {
   const { login } = useAuth();
@@ -15,7 +15,7 @@ export default function Login() {
     setError(""); setLoading(true);
     try {
       await login(form.email, form.password);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Invalid email or password");
     } finally { setLoading(false); }
@@ -23,17 +23,43 @@ export default function Login() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.logo}>
-          <div className={styles.logoIcon}>🔍</div>
-          <h1>Missing Children System</h1>
-          <p>Community-Based Reporting Platform</p>
+
+      {/* Left Panel */}
+      <div className={styles.left}>
+        <Link to="/" className={styles.backBtn}>← Back to Home</Link>
+        <div className={styles.leftContent}>
+          <div className={styles.leftIcon}>🔍</div>
+          <h1 className={styles.leftTitle}>Missing Children System</h1>
+          <p className={styles.leftSub}>AI-Enhanced Community-Based Reporting & Tracking Platform</p>
+          <div className={styles.leftStats}>
+            <div className={styles.leftStat}>
+              <span className={styles.leftStatNum}>1,697</span>
+              <span className={styles.leftStatLabel}>Children reported missing annually in South Africa</span>
+            </div>
+            <div className={styles.leftStat}>
+              <span className={styles.leftStatNum}>30%</span>
+              <span className={styles.leftStatLabel}>Faster community response with our platform</span>
+            </div>
+            <div className={styles.leftStat}>
+              <span className={styles.leftStatNum}>100%</span>
+              <span className={styles.leftStatLabel}>Free for all South African community members</span>
+            </div>
+          </div>
         </div>
-        <div className={styles.card}>
-          <h2>Sign In</h2>
-          <p className={styles.subtitle}>Enter your credentials to continue</p>
-          {error && <div className={styles.error}>{error}</div>}
-          <form onSubmit={handleSubmit}>
+        <div className={styles.leftFooter}>ISJ107V · Tshwane University of Technology · 2026</div>
+      </div>
+
+      {/* Right Panel */}
+      <div className={styles.right}>
+        <div className={styles.formWrap}>
+          <div className={styles.formHeader}>
+            <h2>Welcome back</h2>
+            <p>Sign in to your account to continue</p>
+          </div>
+
+          {error && <div className={styles.error}>⚠ {error}</div>}
+
+          <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
               <label>Email Address</label>
               <input type="email" placeholder="your@email.com" required value={form.email}
@@ -45,12 +71,20 @@ export default function Login() {
                 onChange={e => setForm({...form, password: e.target.value})} />
             </div>
             <button className={styles.btn} disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? <span className={styles.spinner}>⏳ Signing in...</span> : "Sign In →"}
             </button>
           </form>
-          <p className={styles.footer}>Don't have an account? <Link to="/register">Register here</Link></p>
+
+          <div className={styles.divider}><span>New to the platform?</span></div>
+
+          <Link to="/register" className={styles.altBtn}>Create a Free Account</Link>
+
+          <p className={styles.terms}>
+            By signing in you agree to use this platform responsibly for community safety purposes only.
+          </p>
         </div>
       </div>
+
     </div>
   );
 }

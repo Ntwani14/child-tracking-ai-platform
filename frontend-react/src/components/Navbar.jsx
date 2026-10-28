@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API from "../api/axios";
@@ -40,7 +40,7 @@ export default function Navbar() {
       </button>
 
       <div className={`${styles.navLinks} ${menuOpen ? styles.open : ""}`}>
-        <Link className={`${styles.link} ${isActive("/")}`} to="/" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+        <Link className={`${styles.link} ${isActive("/")}`} to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link>
         <Link className={`${styles.link} ${isActive("/submit")}`} to="/submit" onClick={() => setMenuOpen(false)}>Report Missing Child</Link>
         <Link className={`${styles.link} ${isActive("/analytics")}`} to="/analytics" onClick={() => setMenuOpen(false)}>Analytics</Link>
         <Link className={`${styles.link} ${isActive("/admin")}`} to="/admin" onClick={() => setMenuOpen(false)}>Admin</Link>

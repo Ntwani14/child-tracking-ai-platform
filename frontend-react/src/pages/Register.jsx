@@ -1,12 +1,12 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import styles from "./Auth.module.css";
+import styles from "./AuthNew.module.css";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ fullName: "", email: "", password: "", location: "" });
+  const [form, setForm] = useState({ fullName:"", email:"", password:"", location:"" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -15,7 +15,7 @@ export default function Register() {
     setError(""); setLoading(true);
     try {
       await register(form);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed. Please try again.");
     } finally { setLoading(false); }
@@ -23,17 +23,40 @@ export default function Register() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.logo}>
-          <div className={styles.logoIcon}>🔍</div>
-          <h1>Missing Children System</h1>
-          <p>Community-Based Reporting Platform</p>
+
+      {/* Left Panel */}
+      <div className={styles.left}>
+        <Link to="/" className={styles.backBtn}>← Back to Home</Link>
+        <div className={styles.leftContent}>
+          <div className={styles.leftIcon}>🤝</div>
+          <h1 className={styles.leftTitle}>Join the Community</h1>
+          <p className={styles.leftSub}>Help South African communities find missing children faster by joining our platform today.</p>
+          <div className={styles.leftFeatures}>
+            {[
+              "📋 Submit missing children reports instantly",
+              "🔔 Receive alerts for your area automatically",
+              "🤖 AI detects duplicate reports for you",
+              "📊 View live analytics and reporting trends",
+              "🛡️ Your data is secure and private",
+            ].map(f => (
+              <div key={f} className={styles.leftFeature}>{f}</div>
+            ))}
+          </div>
         </div>
-        <div className={styles.card}>
-          <h2>Create Account</h2>
-          <p className={styles.subtitle}>Join the community to help find missing children</p>
-          {error && <div className={styles.error}>{error}</div>}
-          <form onSubmit={handleSubmit}>
+        <div className={styles.leftFooter}>ISJ107V · Tshwane University of Technology · 2026</div>
+      </div>
+
+      {/* Right Panel */}
+      <div className={styles.right}>
+        <div className={styles.formWrap}>
+          <div className={styles.formHeader}>
+            <h2>Create your account</h2>
+            <p>Free forever · No credit card required</p>
+          </div>
+
+          {error && <div className={styles.error}>⚠ {error}</div>}
+
+          <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
               <label>Full Name</label>
               <input type="text" placeholder="Your full name" required value={form.fullName}
@@ -50,17 +73,25 @@ export default function Register() {
                 onChange={e => setForm({...form, password: e.target.value})} />
             </div>
             <div className={styles.field}>
-              <label>Your Area <span className={styles.optional}>(for alert notifications)</span></label>
+              <label>Your Area <span className={styles.optional}>(for local alert notifications)</span></label>
               <input type="text" placeholder="e.g. Soshanguve, Pretoria" value={form.location}
                 onChange={e => setForm({...form, location: e.target.value})} />
             </div>
             <button className={styles.btn} disabled={loading}>
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? "Creating account..." : "Create Account →"}
             </button>
           </form>
-          <p className={styles.footer}>Already have an account? <Link to="/login">Sign in here</Link></p>
+
+          <div className={styles.divider}><span>Already have an account?</span></div>
+
+          <Link to="/login" className={styles.altBtn}>Sign In Instead</Link>
+
+          <p className={styles.terms}>
+            By registering you agree to use this platform responsibly for community safety purposes only.
+          </p>
         </div>
       </div>
+
     </div>
   );
 }

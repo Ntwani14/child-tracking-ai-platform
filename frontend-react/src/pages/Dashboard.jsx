@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import API from "../api/axios";
@@ -54,49 +54,21 @@ export default function Dashboard() {
     <div>
       <Navbar />
       <div className={styles.page}>
-        <div className={styles.statsRow}>
+                <div className={styles.statsRow}>
           {[
-            { label: "Active Cases", value: reports.filter(r=>r.status==="active").length, color: "#2e7d32" },
-            { label: "Children Found", value: reports.filter(r=>r.status==="found").length, color: "#1565c0" },
-            { label: "Reported Today", value: reports.filter(r=>r.createdAt?.startsWith(new Date().toISOString().split("T")[0])).length, color: "#e65100" },
-            { label: "Total Reports", value: reports.length, color: "#1a3c6e" },
+            { label: "Active Cases", value: reports.filter(r=>r.status==="active").length, color: "#2e7d32", bg: "#f0fdf4", icon: "🔴" },
+            { label: "Children Found", value: reports.filter(r=>r.status==="found").length, color: "#1565c0", bg: "#eff6ff", icon: "✅" },
+            { label: "Reported Today", value: reports.filter(r=>r.createdAt?.startsWith(new Date().toISOString().split("T")[0])).length, color: "#e65100", bg: "#fff7ed", icon: "📅" },
+            { label: "Total Reports", value: reports.length, color: "#1a3c6e", bg: "#f0f5ff", icon: "📋" },
           ].map(s => (
             <div key={s.label} className={styles.statCard}>
-              <span className={styles.statNum} style={{color: s.color}}>{s.value}</span>
-              <span className={styles.statLabel}>{s.label}</span>
+              <div className={styles.statIcon} style={{background: s.bg}}>{s.icon}</div>
+              <div className={styles.statText}>
+                <span className={styles.statNum} style={{color: s.color}}>{s.value}</span>
+                <span className={styles.statLabel}>{s.label}</span>
+              </div>
             </div>
           ))}
-        </div>
-
-        <div className={styles.searchSection}>
-          <div className={styles.searchRow}>
-            <input className={styles.searchInput} placeholder="Search reports..." value={search}
-              onChange={e => setSearch(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleSearch()} />
-            <select className={styles.select} value={searchType} onChange={e => setSearchType(e.target.value)}>
-              <option value="name">By Name</option>
-              <option value="location">By Location</option>
-            </select>
-            <button className={styles.btnPrimary} onClick={handleSearch}>Search</button>
-            <button className={styles.btnOutline} onClick={handleReset}>Reset</button>
-          </div>
-          <div className={styles.filterRow}>
-            <select className={styles.select} value={filterGender} onChange={e => setFilterGender(e.target.value)}>
-              <option value="">All Genders</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-            <select className={styles.select} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-              <option value="active">Active</option>
-              <option value="">All Statuses</option>
-              <option value="found">Found</option>
-              <option value="duplicate">Duplicate</option>
-            </select>
-            <input className={styles.ageInput} type="number" placeholder="Min age" min="0" max="18"
-              value={minAge} onChange={e => setMinAge(e.target.value)} />
-            <input className={styles.ageInput} type="number" placeholder="Max age" min="0" max="18"
-              value={maxAge} onChange={e => setMaxAge(e.target.value)} />
-          </div>
         </div>
 
         <div className={styles.sectionHeader}>
@@ -148,7 +120,7 @@ export default function Dashboard() {
             {totalPages > 1 && (
               <div className={styles.pagination}>
                 <button disabled={page===1} onClick={() => setPage(p=>p-1)} className={styles.pageBtn}>← Prev</button>
-                <span>Page {page} of {totalPages}</span>
+                <span className={styles.pageInfo}>Page {page} of {totalPages}</span>
                 <button disabled={page===totalPages} onClick={() => setPage(p=>p+1)} className={styles.pageBtn}>Next →</button>
               </div>
             )}
