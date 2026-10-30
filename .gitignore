@@ -39,3 +39,6 @@ __pycache__/
 *.pyo
 venv/
 .venv/
+
+# Local secrets - email credentials
+application-local.properties

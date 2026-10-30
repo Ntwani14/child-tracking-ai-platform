@@ -46,18 +46,34 @@ public class ReportService {
         report.setSubmittedBy(user);
 
         Report saved = reportRepository.save(report);
-
-        // Trigger AI duplicate detection
         aiDuplicateService.checkForDuplicate(saved);
-
-        // Send alert notifications to relevant users
         notificationService.sendAlertNotifications(saved);
+        return mapToResponse(saved);
+    }
 
+    public ReportResponse markAsFound(String id, String userEmail) {
+        Report report = reportRepository.findById(java.util.UUID.fromString(id))
+                .orElseThrow(() -> new RuntimeException("Report not found"));
+
+        if ("found".equals(report.getStatus())) {
+            throw new RuntimeException("This child has already been marked as found");
+        }
+
+        report.setStatus("found");
+        Report saved = reportRepository.save(report);
+        notificationService.sendFoundNotification(saved);
         return mapToResponse(saved);
     }
 
     public List<ReportResponse> getAllActiveReports() {
         return reportRepository.findByStatus("active")
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ReportResponse> getAllReports() {
+        return reportRepository.findAll()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

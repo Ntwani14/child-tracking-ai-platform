@@ -8,7 +8,6 @@ import com.childtracking.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
@@ -25,26 +24,15 @@ public class NotificationService {
         this.emailService = emailService;
     }
 
+    /**
+     * Sends a missing-child alert to ALL registered users (community-wide alert),
+     * regardless of their saved location. The user who submitted the report is skipped.
+     */
     public void sendAlertNotifications(Report report) {
         List<User> allUsers = userRepository.findAll();
-        String reportLocation = report.getLastSeenLocation().toLowerCase();
 
-        List<User> relevantUsers = allUsers.stream()
-            .filter(user -> {
-                if (user.getLocation() == null || user.getLocation().isBlank()) return false;
-                String userLocation = user.getLocation().toLowerCase();
-                String[] userWords = userLocation.split("[,\\s]+");
-                for (String word : userWords) {
-                    if (word.length() > 2 && reportLocation.contains(word)) return true;
-                }
-                return false;
-            })
-            .collect(Collectors.toList());
-
-        if (relevantUsers.isEmpty()) relevantUsers = allUsers;
-
-        // Save in-app notifications
-        for (User user : relevantUsers) {
+        // Save in-app notifications for every user except the submitter
+        for (User user : allUsers) {
             if (user.getUserId().equals(report.getSubmittedBy().getUserId())) continue;
             Notification notification = new Notification();
             notification.setUser(user);
@@ -58,8 +46,30 @@ public class NotificationService {
             notificationRepository.save(notification);
         }
 
-        // Send email alerts (only if EMAIL_ENABLED=true)
-        emailService.sendAlertEmails(report, relevantUsers);
+        // Send email alerts to all users (EmailService skips the submitter and blank emails)
+        emailService.sendAlertEmails(report, allUsers);
+    }
+
+
+    public void sendFoundNotification(Report report) {
+        List<User> allUsers = userRepository.findAll();
+
+        String message = "GREAT NEWS! " + report.getChildName() +
+                " (" + report.getGender() + ", " + report.getAge() + " years old) " +
+                "who was last seen at " + report.getLastSeenLocation() +
+                " has been FOUND safely. Thank you to everyone who helped!";
+
+        // Save in-app notification for all users
+        for (User user : allUsers) {
+            Notification notification = new Notification();
+            notification.setUser(user);
+            notification.setReport(report);
+            notification.setMessage(message);
+            notificationRepository.save(notification);
+        }
+
+        // Send email to all users
+        emailService.sendFoundEmails(report, allUsers);
     }
 
     public List<Notification> getNotificationsForUser(User user) {

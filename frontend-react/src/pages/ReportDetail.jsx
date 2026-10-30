@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import API from "../api/axios";
@@ -10,9 +10,11 @@ export default function ReportDetail() {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [marking, setMarking] = useState(false);
+  const [marked, setMarked] = useState(false);
 
   useEffect(() => {
-    API.get(`/reports/${id}`).then(r => setReport(r.data)).catch(() => navigate("/")).finally(() => setLoading(false));
+    API.get(`/reports/${id}`).then(r => setReport(r.data)).catch(() => navigate("/dashboard")).finally(() => setLoading(false));
   }, [id]);
 
   const shareReport = () => {
@@ -20,6 +22,18 @@ export default function ReportDetail() {
     navigator.clipboard?.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
+  };
+
+  const markAsFound = async () => {
+    if (!confirm(`Are you sure you want to mark ${report.childName} as FOUND? This will notify all registered users.`)) return;
+    setMarking(true);
+    try {
+      const { data } = await API.put(`/reports/${id}/found`);
+      setReport(data);
+      setMarked(true);
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to update report.");
+    } finally { setMarking(false); }
   };
 
   const statusColor = { active: "#2e7d32", found: "#1565c0", duplicate: "#e65100" };
@@ -31,11 +45,18 @@ export default function ReportDetail() {
     <div>
       <Navbar />
       <div className={styles.page}>
-        <button className={styles.back} onClick={() => navigate("/")}>← Back to Dashboard</button>
+        <button className={styles.back} onClick={() => navigate("/dashboard")}>← Back to Dashboard</button>
+
+        {marked && (
+          <div className={styles.successBanner}>
+            🎉 Thank you! {report.childName} has been marked as found. All community members have been notified.
+          </div>
+        )}
+
         <div className={styles.card}>
-          <div className={styles.banner}>
-            <span className={styles.badge} style={{background: statusColor[report.status]+"33", color: statusColor[report.status]}}>
-              {report.status.toUpperCase()}
+          <div className={styles.banner} style={{background: report.status === "found" ? "linear-gradient(135deg, #15803d, #16a34a)" : "linear-gradient(135deg, #1a3c6e, #2d6cdf)"}}>
+            <span className={styles.badge}>
+              {report.status === "found" ? "✓ FOUND" : report.status.toUpperCase()}
             </span>
             <h1>{report.childName}</h1>
             <p>{report.gender} · {report.age} years old · Last seen {new Date(report.dateLastSeen).toLocaleDateString("en-ZA", {day:"numeric",month:"long",year:"numeric"})}</p>
@@ -66,11 +87,29 @@ export default function ReportDetail() {
               <p>{report.physicalDescription}</p>
             </div>
 
-            <div className={styles.shareBox}>
-              <p>Help find this child — share this report with your community</p>
-              <button className={styles.shareBtn} onClick={shareReport}>
-                {copied ? "✓ Copied to Clipboard!" : "Share Report"}
-              </button>
+            {/* Action buttons */}
+            <div className={styles.actions}>
+              <div className={styles.shareBox}>
+                <p>Help find this child — share this report with your community</p>
+                <button className={styles.shareBtn} onClick={shareReport}>
+                  {copied ? "✓ Copied to Clipboard!" : "📤 Share Report"}
+                </button>
+              </div>
+
+              {report.status === "active" && (
+                <div className={styles.foundBox}>
+                  <p>Did you see this child? Let the community know!</p>
+                  <button className={styles.foundBtn} onClick={markAsFound} disabled={marking}>
+                    {marking ? "Updating..." : "✅ I Found This Child!"}
+                  </button>
+                </div>
+              )}
+
+              {report.status === "found" && (
+                <div className={styles.foundBanner}>
+                  🎉 This child has been found! Thank you to everyone who helped.
+                </div>
+              )}
             </div>
           </div>
 

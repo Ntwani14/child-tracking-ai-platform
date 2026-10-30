@@ -25,7 +25,7 @@ public class AnalyticsController {
         Map<String, Object> result = new LinkedHashMap<>();
         try {
             javax.sql.DataSource dataSource = reportRepository.findAll().isEmpty() ? null : null;
-            // Return placeholder — populated after CSV import
+            // Return placeholder â€” populated after CSV import
             result.put("source", "SAPS Crime Statistics (Kaggle dataset)");
             result.put("note", "Run data/import_crime_stats.py to populate this data");
         } catch (Exception e) {

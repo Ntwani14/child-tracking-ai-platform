@@ -36,7 +36,7 @@ public class EmailService {
             return;
         }
 
-        String subject = "ALERT: Missing Child — " + report.getChildName();
+        String subject = "ALERT: Missing Child â€” " + report.getChildName();
         String body = buildEmailBody(report);
 
         for (User user : users) {
@@ -63,7 +63,7 @@ public class EmailService {
     public void sendDuplicateAlert(Report newReport, Report matchedReport, double score, List<User> admins) {
         if (!emailEnabled) return;
 
-        String subject = "Duplicate Report Detected — " + newReport.getChildName();
+        String subject = "Duplicate Report Detected â€” " + newReport.getChildName();
         String body = String.format(
             "The AI duplicate detection system has flagged a potential duplicate report.\n\n" +
             "NEW REPORT:\n" +
@@ -97,6 +97,43 @@ public class EmailService {
         }
     }
 
+
+    /**
+     * Sends good news email to all users when a child is found.
+     */
+    public void sendFoundEmails(Report report, List<User> users) {
+        if (!emailEnabled) return;
+
+        String subject = "GREAT NEWS: " + report.getChildName() + " Has Been Found!";
+        String body = String.format(
+            "GREAT NEWS FROM THE MISSING CHILDREN SYSTEM\n" +
+            "=============================================\n\n" +
+            "%s (%s, %d years old) who was last seen at %s\n" +
+            "has been FOUND safely!\n\n" +
+            "Thank you to every community member who shared this report\n" +
+            "and helped bring this child home safely.\n\n" +
+            "Together we are making a difference.\n\n" +
+            "---\n" +
+            "Missing Children Reporting System\n" +
+            "This is an automated notification.",
+            report.getChildName(), report.getGender(), report.getAge(),
+            report.getLastSeenLocation()
+        );
+
+        for (User user : users) {
+            if (user.getEmail() == null || user.getEmail().isBlank()) continue;
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(fromEmail);
+                message.setTo(user.getEmail());
+                message.setSubject(subject);
+                message.setText(body);
+                mailSender.send(message);
+            } catch (Exception e) {
+                logger.warning("Failed to send found email to " + user.getEmail() + ": " + e.getMessage());
+            }
+        }
+    }
     private String buildEmailBody(Report report) {
         return String.format(
             "MISSING CHILD ALERT\n" +

@@ -22,7 +22,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    // POST /api/reports — submit a new report
+    // POST /api/reports - submit a new report
     @PostMapping
     public ResponseEntity<?> submitReport(
             @Valid @RequestBody ReportRequest request,
@@ -36,7 +36,7 @@ public class ReportController {
         }
     }
 
-    // GET /api/reports — get all active reports, with optional filters
+    // GET /api/reports - get all active reports, with optional filters
     @GetMapping
     public ResponseEntity<List<ReportResponse>> getReports(
             @RequestParam(required = false) String name,
@@ -51,13 +51,33 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getAllActiveReports());
     }
 
-    // GET /api/reports/{id} — get a specific report by ID
+    // GET /api/reports/all - get ALL reports including found and duplicate (for stats)
+    @GetMapping("/all")
+    public ResponseEntity<List<ReportResponse>> getAllReports() {
+        return ResponseEntity.ok(reportService.getAllReports());
+    }
+
+    // GET /api/reports/{id} - get a specific report by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getReportById(@PathVariable String id) {
         try {
             return ResponseEntity.ok(reportService.getReportById(id));
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // PUT /api/reports/{id}/found - any authenticated user can mark a child as found
+    @PutMapping("/{id}/found")
+    public ResponseEntity<?> markAsFound(
+            @PathVariable String id,
+            Authentication authentication) {
+        try {
+            String userEmail = authentication.getName();
+            ReportResponse response = reportService.markAsFound(id, userEmail);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }
