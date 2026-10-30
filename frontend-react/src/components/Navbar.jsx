@@ -43,7 +43,9 @@ export default function Navbar() {
         <Link className={`${styles.link} ${isActive("/")}`} to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link>
         <Link className={`${styles.link} ${isActive("/submit")}`} to="/submit" onClick={() => setMenuOpen(false)}>Report Missing Child</Link>
         <Link className={`${styles.link} ${isActive("/analytics")}`} to="/analytics" onClick={() => setMenuOpen(false)}>Analytics</Link>
-        <Link className={`${styles.link} ${isActive("/admin")}`} to="/admin" onClick={() => setMenuOpen(false)}>Admin</Link>
+        {user?.role === "admin" && (
+          <Link className={`${styles.link} ${isActive("/admin")}`} to="/admin" onClick={() => setMenuOpen(false)}>Admin</Link>
+        )}
 
         <div className={styles.notifWrap} ref={notifRef}>
           <button className={styles.bell} onClick={() => setShowNotif(!showNotif)}>

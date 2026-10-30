@@ -35,3 +35,19 @@
 .foundBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 .foundBanner { grid-column: 1 / -1; background: linear-gradient(135deg, #dcfce7, #bbf7d0); border: 1.5px solid #86efac; border-radius: 12px; padding: 20px; text-align: center; color: #15803d; font-size: 1rem; font-weight: 600; }
 @media (max-width: 600px) { .actions { grid-template-columns: 1fr; } }
+/* --- Social share buttons --- */
+.actions { grid-template-columns: 1fr; }
+.shareRow { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 12px; }
+.socialBtn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 16px; border: none; border-radius: 8px; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, opacity 0.15s; min-width: 110px; }
+.socialBtn:hover { transform: translateY(-2px); opacity: 0.92; }
+.whatsapp { background: #25D366; }
+.facebook { background: #1877F2; }
+.twitter  { background: #000000; }
+.telegram { background: #229ED9; }
+.email    { background: #6b7280; }
+.copyBtn { padding: 9px 18px; background: #f3f4f6; color: #374151; border: 1.5px solid #e0e4ed; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.copyBtn:hover { border-color: #2d6cdf; color: #2d6cdf; }
+
+/* --- TikTok --- */
+.tiktok { background: #000000; }
+.tiktokHint { color: #15803d; font-size: 0.82rem; font-weight: 600; margin: 4px 0 12px; }

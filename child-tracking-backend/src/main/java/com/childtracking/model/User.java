@@ -37,4 +37,13 @@ public class User {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "reset_code", length = 10)
+    private String resetCode;
+
+    @Column(name = "reset_code_expiry")
+    private LocalDateTime resetCodeExpiry;
+
+    @Column(name = "reset_attempts")
+    private Integer resetAttempts = 0;
 }

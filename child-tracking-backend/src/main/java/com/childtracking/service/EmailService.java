@@ -28,7 +28,7 @@ public class EmailService {
     }
 
     /**
-     * Sends alert email to a list of users when a new report is submitted.
+     * Sends a missing-child alert email to a list of users when a new report is submitted.
      */
     public void sendAlertEmails(Report report, List<User> users) {
         if (!emailEnabled) {
@@ -36,8 +36,8 @@ public class EmailService {
             return;
         }
 
-        String subject = "ALERT: Missing Child â€” " + report.getChildName();
-        String body = buildEmailBody(report);
+        String subject = "MISSING CHILD ALERT: " + report.getChildName() + " (" + report.getAge() + ", last seen " + report.getLastSeenLocation() + ")";
+        String body = buildAlertBody(report);
 
         for (User user : users) {
             if (user.getEmail() == null || user.getEmail().isBlank()) continue;
@@ -63,20 +63,25 @@ public class EmailService {
     public void sendDuplicateAlert(Report newReport, Report matchedReport, double score, List<User> admins) {
         if (!emailEnabled) return;
 
-        String subject = "Duplicate Report Detected â€” " + newReport.getChildName();
+        String subject = "Possible Duplicate Report: " + newReport.getChildName();
         String body = String.format(
-            "The AI duplicate detection system has flagged a potential duplicate report.\n\n" +
-            "NEW REPORT:\n" +
-            "  Child: %s (%s, %d years old)\n" +
+            "AUTOMATED DUPLICATE DETECTION\n" +
+            "=============================\n\n" +
+            "The AI duplicate-detection module has flagged a newly submitted report\n" +
+            "as a possible duplicate of an existing case. Please review it in the admin panel.\n\n" +
+            "NEW REPORT\n" +
+            "  Child:    %s (%s, %d years old)\n" +
             "  Location: %s\n" +
-            "  Report ID: %s\n\n" +
-            "MATCHED REPORT:\n" +
-            "  Child: %s\n" +
+            "  ID:       %s\n\n" +
+            "POSSIBLE MATCH\n" +
+            "  Child:    %s\n" +
             "  Location: %s\n" +
-            "  Report ID: %s\n\n" +
-            "Similarity Score: %.1f%%\n\n" +
-            "Please log in to the admin panel to review and resolve this flag.\n" +
-            "http://localhost:3000/admin",
+            "  ID:       %s\n\n" +
+            "Similarity score: %.1f%%\n\n" +
+            "Review and resolve this flag here:\n" +
+            "http://localhost:3000/admin\n\n" +
+            "---\n" +
+            "Missing Children Reporting System (automated message)",
             newReport.getChildName(), newReport.getGender(), newReport.getAge(),
             newReport.getLastSeenLocation(), newReport.getReportId(),
             matchedReport.getChildName(), matchedReport.getLastSeenLocation(), matchedReport.getReportId(),
@@ -97,28 +102,14 @@ public class EmailService {
         }
     }
 
-
     /**
-     * Sends good news email to all users when a child is found.
+     * Sends good-news email to all users when a child is found.
      */
     public void sendFoundEmails(Report report, List<User> users) {
         if (!emailEnabled) return;
 
-        String subject = "GREAT NEWS: " + report.getChildName() + " Has Been Found!";
-        String body = String.format(
-            "GREAT NEWS FROM THE MISSING CHILDREN SYSTEM\n" +
-            "=============================================\n\n" +
-            "%s (%s, %d years old) who was last seen at %s\n" +
-            "has been FOUND safely!\n\n" +
-            "Thank you to every community member who shared this report\n" +
-            "and helped bring this child home safely.\n\n" +
-            "Together we are making a difference.\n\n" +
-            "---\n" +
-            "Missing Children Reporting System\n" +
-            "This is an automated notification.",
-            report.getChildName(), report.getGender(), report.getAge(),
-            report.getLastSeenLocation()
-        );
+        String subject = "GOOD NEWS: " + report.getChildName() + " has been found safe";
+        String body = buildFoundBody(report);
 
         for (User user : users) {
             if (user.getEmail() == null || user.getEmail().isBlank()) continue;
@@ -129,33 +120,102 @@ public class EmailService {
                 message.setSubject(subject);
                 message.setText(body);
                 mailSender.send(message);
+                logger.info("Found email sent to: " + user.getEmail());
             } catch (Exception e) {
                 logger.warning("Failed to send found email to " + user.getEmail() + ": " + e.getMessage());
             }
         }
     }
-    private String buildEmailBody(Report report) {
+
+    private String buildAlertBody(Report report) {
+        String reporter = report.getSubmittedBy() != null && report.getSubmittedBy().getFullName() != null
+                ? report.getSubmittedBy().getFullName()
+                : "a community member";
+
         return String.format(
             "MISSING CHILD ALERT\n" +
-            "====================\n\n" +
-            "A new missing children report has been submitted in your area.\n\n" +
-            "CHILD INFORMATION:\n" +
-            "  Name: %s\n" +
-            "  Age: %d years old\n" +
-            "  Gender: %s\n" +
-            "  Last Seen: %s\n" +
-            "  Location: %s\n\n" +
-            "DESCRIPTION:\n" +
+            "===================\n\n" +
+            "A new missing children report has been submitted to your community\n" +
+            "platform. Please read the details below and share with people you trust.\n\n" +
+            "CHILD INFORMATION\n" +
+            "  Name:       %s\n" +
+            "  Age:        %d years old\n" +
+            "  Gender:     %s\n" +
+            "  Last seen:  %s\n" +
+            "  Location:   %s\n\n" +
+            "DESCRIPTION\n" +
             "  %s\n\n" +
-            "If you have any information about this child, please contact your nearest\n" +
-            "police station or call the South African Police Service on 10111.\n\n" +
-            "View the full report: http://localhost:3000/reports/%s\n\n" +
+            "Reported by: %s\n\n" +
+            "WHAT YOU CAN DO\n" +
+            "  - If you have seen this child, open the report and use the\n" +
+            "    \"I Found This Child\" button so the whole community is updated.\n" +
+            "  - Contact your nearest police station, or call the South African\n" +
+            "    Police Service on 10111, or Missing Children SA on 072 647 7464.\n\n" +
+            "View the full report:\n" +
+            "http://localhost:3000/reports/%s\n\n" +
             "---\n" +
             "Missing Children Reporting System\n" +
-            "This is an automated alert. Do not reply to this email.",
+            "This is an automated alert. Please do not reply to this email.",
             report.getChildName(), report.getAge(), report.getGender(),
             report.getDateLastSeen(), report.getLastSeenLocation(),
-            report.getPhysicalDescription(), report.getReportId()
+            report.getPhysicalDescription(), reporter, report.getReportId()
         );
+    }
+
+    private String buildFoundBody(Report report) {
+        return String.format(
+            "GOOD NEWS FROM YOUR COMMUNITY\n" +
+            "============================\n\n" +
+            "%s (%s, %d years old), who was last seen at %s,\n" +
+            "has been FOUND and is safe.\n\n" +
+            "Thank you to every community member who shared this report and kept\n" +
+            "watch. Your attention and quick action make a real difference.\n\n" +
+            "This case is now closed on the platform. No further action is needed.\n\n" +
+            "---\n" +
+            "Missing Children Reporting System\n" +
+            "This is an automated notification. Please do not reply to this email.",
+            report.getChildName(), report.getGender(), report.getAge(),
+            report.getLastSeenLocation()
+        );
+    }
+    /**
+     * Sends a password-reset code to a single user. Returns true if the send succeeded.
+     */
+    public boolean sendPasswordResetEmail(User user, String code) {
+        if (!emailEnabled) {
+            logger.info("Email disabled - reset code for " + user.getEmail() + " is: " + code);
+            return false;
+        }
+        String subject = "Your password reset code: " + code;
+        String body = String.format(
+            "PASSWORD RESET REQUEST\n" +
+            "======================\n\n" +
+            "Hello %s,\n\n" +
+            "We received a request to reset the password for your Missing Children\n" +
+            "Reporting System account.\n\n" +
+            "Your reset code is:\n\n" +
+            "    %s\n\n" +
+            "Enter this code on the reset page to choose a new password.\n" +
+            "This code will expire in 15 minutes.\n\n" +
+            "If you did not request this, you can safely ignore this email and your\n" +
+            "password will stay the same.\n\n" +
+            "---\n" +
+            "Missing Children Reporting System\n" +
+            "This is an automated message. Please do not reply.",
+            user.getFullName() != null ? user.getFullName() : "there", code
+        );
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(user.getEmail());
+            message.setSubject(subject);
+            message.setText(body);
+            mailSender.send(message);
+            logger.info("Password reset email sent to: " + user.getEmail());
+            return true;
+        } catch (Exception e) {
+            logger.warning("Failed to send reset email to " + user.getEmail() + ": " + e.getMessage());
+            return false;
+        }
     }
 }

@@ -70,6 +70,9 @@ export default function Login() {
               <input type="password" placeholder="Enter your password" required value={form.password}
                 onChange={e => setForm({...form, password: e.target.value})} />
             </div>
+            <div style={{textAlign:"right",marginTop:"-6px"}}>
+              <Link to="/forgot-password" style={{color:"#2d6cdf",fontSize:"0.82rem",fontWeight:600}}>Forgot password?</Link>
+            </div>
             <button className={styles.btn} disabled={loading}>
               {loading ? <span className={styles.spinner}>⏳ Signing in...</span> : "Sign In →"}
             </button>

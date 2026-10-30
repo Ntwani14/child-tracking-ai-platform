@@ -42,3 +42,6 @@ venv/
 
 # Local secrets - email credentials
 application-local.properties
+
+# Frontend build output
+frontend-react/dist/

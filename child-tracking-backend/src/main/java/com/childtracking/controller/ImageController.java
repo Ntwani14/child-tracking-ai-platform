@@ -50,11 +50,8 @@ public class ImageController {
                 Files.createDirectories(uploadPath);
             }
 
-            // Generate unique filename to avoid conflicts
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename != null && originalFilename.contains(".")
-                ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : ".jpg";
+            // Derive extension from the validated content type (never trust the client filename)
+            String extension = contentType.equals("image/png") ? ".png" : ".jpg";
             String filename = UUID.randomUUID().toString() + extension;
 
             // Save file to disk
@@ -76,7 +73,14 @@ public class ImageController {
     @GetMapping("/{filename}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
-            Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
+            Path baseDir = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Path filePath = baseDir.resolve(filename).normalize();
+
+            // Prevent path traversal: resolved path must stay inside the upload directory
+            if (!filePath.startsWith(baseDir)) {
+                return ResponseEntity.badRequest().build();
+            }
+
             Resource resource = new UrlResource(filePath.toUri());
 
             if (!resource.exists()) {
