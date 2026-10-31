@@ -45,3 +45,6 @@ application-local.properties
 
 # Frontend build output
 frontend-react/dist/
+
+# Microsoft Office temp/lock files
+~$*
