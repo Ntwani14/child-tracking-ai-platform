@@ -45,6 +45,9 @@ public class Report {
     @Column(name = "status", nullable = false, length = 20)
     private String status = "active";
 
+    @Column(name = "found_note", length = 500)
+    private String foundNote;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "submitted_by", nullable = false)
     private User submittedBy;

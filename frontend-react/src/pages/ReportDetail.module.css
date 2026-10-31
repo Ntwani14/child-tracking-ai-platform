@@ -51,3 +51,20 @@
 /* --- TikTok --- */
 .tiktok { background: #000000; }
 .tiktokHint { color: #15803d; font-size: 0.82rem; font-weight: 600; margin: 4px 0 12px; }
+
+/* --- Found safety modal --- */
+.modalOverlay { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
+.modal { background: #fff; border-radius: 16px; max-width: 460px; width: 100%; padding: 26px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+.modalTitle { font-size: 1.25rem; font-weight: 800; color: #15803d; margin-bottom: 14px; }
+.modalSafety { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px 16px; font-size: 0.88rem; color: #166534; line-height: 1.6; margin-bottom: 18px; }
+.modalSafety ul { margin: 8px 0 8px 18px; }
+.modalSafety li { margin-bottom: 2px; }
+.modalLabel { display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 6px; }
+.modalTextarea { width: 100%; border: 1.5px solid #e0e4ed; border-radius: 10px; padding: 10px 12px; font-size: 0.9rem; font-family: inherit; resize: vertical; margin-bottom: 18px; }
+.modalTextarea:focus { outline: none; border-color: #2d6cdf; }
+.modalActions { display: flex; gap: 10px; justify-content: flex-end; }
+.modalCancel { padding: 10px 20px; background: #f3f4f6; color: #374151; border: 1.5px solid #e0e4ed; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+.modalCancel:hover:not(:disabled) { border-color: #9ca3af; }
+.modalConfirm { padding: 10px 20px; background: linear-gradient(135deg, #15803d, #16a34a); color: #fff; border: none; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
+.modalConfirm:disabled, .modalCancel:disabled { opacity: 0.6; cursor: not-allowed; }
+.foundNote { margin-top: 10px; font-size: 0.85rem; font-weight: 500; font-style: italic; color: #166534; }

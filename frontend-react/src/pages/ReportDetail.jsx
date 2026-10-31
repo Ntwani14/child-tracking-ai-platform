@@ -35,6 +35,8 @@ export default function ReportDetail() {
   const [tiktokCopied, setTiktokCopied] = useState(false);
   const [marking, setMarking] = useState(false);
   const [marked, setMarked] = useState(false);
+  const [showFoundModal, setShowFoundModal] = useState(false);
+  const [foundNote, setFoundNote] = useState("");
 
   useEffect(() => {
     API.get(`/reports/${id}`).then(r => setReport(r.data)).catch(() => navigate("/dashboard")).finally(() => setLoading(false));
@@ -83,13 +85,13 @@ export default function ReportDetail() {
     window.open(links[network], "_blank", "noopener,noreferrer");
   };
 
-  const markAsFound = async () => {
-    if (!confirm(`Are you sure you want to mark ${report.childName} as FOUND? This will notify all registered users.`)) return;
+  const confirmFound = async () => {
     setMarking(true);
     try {
-      const { data } = await API.put(`/reports/${id}/found`);
+      const { data } = await API.put(`/reports/${id}/found`, { foundNote });
       setReport(data);
       setMarked(true);
+      setShowFoundModal(false);
     } catch (err) {
       alert(err.response?.data?.error || "Failed to update report.");
     } finally { setMarking(false); }
@@ -168,7 +170,7 @@ export default function ReportDetail() {
               {report.status === "active" && (
                 <div className={styles.foundBox}>
                   <p>Did you see this child? Let the community know!</p>
-                  <button className={styles.foundBtn} onClick={markAsFound} disabled={marking}>
+                  <button className={styles.foundBtn} onClick={() => setShowFoundModal(true)} disabled={marking}>
                     {marking ? "Updating..." : "I Found This Child!"}
                   </button>
                 </div>
@@ -177,6 +179,9 @@ export default function ReportDetail() {
               {report.status === "found" && (
                 <div className={styles.foundBanner}>
                   This child has been found! Thank you to everyone who helped.
+                  {report.foundNote && (
+                    <div className={styles.foundNote}>Note from finder: &ldquo;{report.foundNote}&rdquo;</div>
+                  )}
                 </div>
               )}
             </div>
@@ -188,6 +193,37 @@ export default function ReportDetail() {
           </div>
         </div>
       </div>
+      {showFoundModal && (
+        <div className={styles.modalOverlay} onClick={() => !marking && setShowFoundModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h2 className={styles.modalTitle}>Report that {report.childName} is safe</h2>
+            <div className={styles.modalSafety}>
+              <strong>Please keep the child safe.</strong> Do not take the child anywhere.
+              Stay where you are and contact the authorities immediately:
+              <ul>
+                <li>SAPS (Police): <strong>10111</strong></li>
+                <li>Missing Children SA: <strong>072 647 7464</strong></li>
+              </ul>
+              They will handle safe reunification with the family.
+            </div>
+            <label className={styles.modalLabel}>Where / how was the child found? (optional)</label>
+            <textarea
+              className={styles.modalTextarea}
+              rows={3}
+              maxLength={500}
+              placeholder="e.g. Found safe at Soshanguve taxi rank, police have been called."
+              value={foundNote}
+              onChange={e => setFoundNote(e.target.value)}
+            />
+            <div className={styles.modalActions}>
+              <button className={styles.modalCancel} onClick={() => setShowFoundModal(false)} disabled={marking}>Cancel</button>
+              <button className={styles.modalConfirm} onClick={confirmFound} disabled={marking}>
+                {marking ? "Updating..." : "Confirm — Child Is Safe"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

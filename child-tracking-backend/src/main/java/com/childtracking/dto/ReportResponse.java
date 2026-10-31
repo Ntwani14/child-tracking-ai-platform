@@ -15,4 +15,5 @@ public class ReportResponse {
     private String status;
     private String submittedBy;
     private String createdAt;
+    private String foundNote;
 }

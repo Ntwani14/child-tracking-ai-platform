@@ -51,7 +51,7 @@ public class ReportService {
         return mapToResponse(saved);
     }
 
-    public ReportResponse markAsFound(String id, String userEmail) {
+    public ReportResponse markAsFound(String id, String userEmail, String foundNote) {
         Report report = reportRepository.findById(java.util.UUID.fromString(id))
                 .orElseThrow(() -> new RuntimeException("Report not found"));
 
@@ -60,6 +60,9 @@ public class ReportService {
         }
 
         report.setStatus("found");
+        if (foundNote != null && !foundNote.isBlank()) {
+            report.setFoundNote(foundNote.trim());
+        }
         Report saved = reportRepository.save(report);
         notificationService.sendFoundNotification(saved);
         return mapToResponse(saved);
@@ -112,6 +115,7 @@ public class ReportService {
         response.setStatus(report.getStatus());
         response.setSubmittedBy(report.getSubmittedBy().getFullName());
         response.setCreatedAt(report.getCreatedAt().toString());
+        response.setFoundNote(report.getFoundNote());
         return response;
     }
 }

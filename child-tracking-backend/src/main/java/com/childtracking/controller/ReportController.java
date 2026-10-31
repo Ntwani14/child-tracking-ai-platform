@@ -71,10 +71,12 @@ public class ReportController {
     @PutMapping("/{id}/found")
     public ResponseEntity<?> markAsFound(
             @PathVariable String id,
+            @RequestBody(required = false) Map<String, String> body,
             Authentication authentication) {
         try {
             String userEmail = authentication.getName();
-            ReportResponse response = reportService.markAsFound(id, userEmail);
+            String foundNote = (body != null) ? body.get("foundNote") : null;
+            ReportResponse response = reportService.markAsFound(id, userEmail, foundNote);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
