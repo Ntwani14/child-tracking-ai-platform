@@ -19,7 +19,7 @@ export default function Landing() {
       <nav className={styles.nav}>
         <div className={styles.navBrand}>
           <span className={styles.navIcon}>🔍</span>
-          <span>Missing Children System</span>
+          <span>Missing Children Reporting System</span>
         </div>
         <div className={styles.navLinks}>
           <Link to="/login" className={styles.navLogin}>Sign In</Link>
@@ -36,23 +36,24 @@ export default function Landing() {
             <span className={styles.heroAccent}>Help Find Missing Children.</span>
           </h1>
           <p className={styles.heroSub}>
-            A centralized AI-powered platform for South African communities to report,
-            track and share information about missing children — faster than ever before.
+            A centralized, AI-enhanced platform for South African communities to report,
+            track and share information about missing children — turning scattered
+            messages into one clear, coordinated response.
           </p>
           <div className={styles.heroStats}>
             <div className={styles.heroStat}>
               <span className={styles.heroStatNum}>1,697</span>
-              <span className={styles.heroStatLabel}>Children reported missing annually</span>
+              <span className={styles.heroStatLabel}>Children reported missing each year in South Africa</span>
             </div>
             <div className={styles.heroStatDiv} />
             <div className={styles.heroStat}>
               <span className={styles.heroStatNum}>1 in 5hrs</span>
-              <span className={styles.heroStatLabel}>A child goes missing every 5 hours</span>
+              <span className={styles.heroStatLabel}>Roughly one child goes missing every five hours</span>
             </div>
             <div className={styles.heroStatDiv} />
             <div className={styles.heroStat}>
               <span className={styles.heroStatNum}>30%</span>
-              <span className={styles.heroStatLabel}>Faster response with our platform</span>
+              <span className={styles.heroStatLabel}>Target improvement in community response time</span>
             </div>
           </div>
           <div className={styles.heroCTA}>
@@ -69,24 +70,24 @@ export default function Landing() {
             <div className={styles.mockReport}>
               <div className={styles.mockAvatar}>👦</div>
               <div>
-                <div className={styles.mockName}>Thabo Nkosi</div>
-                <div className={styles.mockDetail}>Male · 12 years · Mamelodi East</div>
+                <div className={styles.mockName}>Katlego Mokoena</div>
+                <div className={styles.mockDetail}>Male · 6 years · Katlehong</div>
                 <div className={styles.mockBadge}>ACTIVE</div>
               </div>
             </div>
             <div className={styles.mockReport}>
               <div className={styles.mockAvatar}>👧</div>
               <div>
-                <div className={styles.mockName}>Lebo Dlamini</div>
-                <div className={styles.mockDetail}>Female · 8 years · Soshanguve</div>
+                <div className={styles.mockName}>Amogelang Dlamini</div>
+                <div className={styles.mockDetail}>Female · 5 years · Soshanguve</div>
                 <div className={styles.mockBadge}>ACTIVE</div>
               </div>
             </div>
             <div className={styles.mockReport}>
               <div className={styles.mockAvatar}>👦</div>
               <div>
-                <div className={styles.mockName}>Sipho Khumalo</div>
-                <div className={styles.mockDetail}>Male · 14 years · Soweto</div>
+                <div className={styles.mockName}>Timmy Shai</div>
+                <div className={styles.mockDetail}>Male · 4 years · Midrand</div>
                 <div className={styles.mockBadgeFound}>FOUND ✓</div>
               </div>
             </div>
@@ -104,12 +105,12 @@ export default function Landing() {
           <p className={styles.featuresSub}>Built specifically for South African communities to respond faster when a child goes missing</p>
           <div className={styles.featureGrid}>
             {[
-              { icon: "📋", title: "Submit Reports", desc: "Report a missing child in minutes with photos, description and last known location." },
-              { icon: "🤖", title: "AI Duplicate Detection", desc: "Our AI automatically detects duplicate reports using NLP text similarity analysis." },
-              { icon: "🔔", title: "Instant Alerts", desc: "Receive email and in-app notifications when a child is reported missing in your area." },
-              { icon: "📍", title: "Location Filtering", desc: "Search and filter reports by location, age, gender and status in real time." },
-              { icon: "📊", title: "Analytics Dashboard", desc: "View reporting trends by province, time period and age group from live data." },
-              { icon: "🛡️", title: "Secure & Private", desc: "JWT authentication and BCrypt encryption protect all sensitive information." },
+              { icon: "📋", title: "Submit Reports", desc: "Report a missing child in minutes with a photo, physical description and last known location." },
+              { icon: "🤖", title: "AI Duplicate Detection", desc: "Our AI automatically flags likely duplicate reports using NLP text-similarity analysis, so cases stay clear and accurate." },
+              { icon: "🔔", title: "Instant Alerts", desc: "Every registered member receives an email and in-app alert the moment a new report is submitted." },
+              { icon: "📤", title: "One-Tap Sharing", desc: "Share any report straight to WhatsApp, Facebook, X, Telegram and more to spread the word fast." },
+              { icon: "📊", title: "Analytics Dashboard", desc: "View reporting trends by location, time period and age group from live system data." },
+              { icon: "🛡️", title: "Secure & Private", desc: "JWT authentication and BCrypt password hashing protect all sensitive information." },
             ].map(f => (
               <div key={f.title} className={styles.featureCard}>
                 <div className={styles.featureIcon}>{f.icon}</div>
@@ -127,10 +128,10 @@ export default function Landing() {
           <h2 className={styles.featuresTitle}>How it works</h2>
           <div className={styles.steps}>
             {[
-              { num: "1", title: "Register", desc: "Create a free account and set your location to receive local alerts." },
-              { num: "2", title: "Report", desc: "Submit a missing children report with all details and an optional photo." },
-              { num: "3", title: "Alert", desc: "The system instantly notifies community members in the affected area." },
-              { num: "4", title: "Find", desc: "Community members respond, share information and help locate the child." },
+              { num: "1", title: "Register", desc: "Create a free account in seconds to join your community platform." },
+              { num: "2", title: "Report", desc: "Submit a missing children report with full details and an optional photo." },
+              { num: "3", title: "Alert", desc: "The system instantly notifies every registered community member." },
+              { num: "4", title: "Find", desc: "Members respond, share the report and help locate the child safely." },
             ].map(s => (
               <div key={s.num} className={styles.step}>
                 <div className={styles.stepNum}>{s.num}</div>
@@ -146,7 +147,7 @@ export default function Landing() {
       <section className={styles.ctaBanner}>
         <div className={styles.featuresInner}>
           <h2>Ready to help your community?</h2>
-          <p>Join thousands of South Africans working together to find missing children faster.</p>
+          <p>Join a growing community of South Africans working together to find missing children faster.</p>
           <Link to="/register" className={styles.ctaPrimary}>Create Free Account</Link>
         </div>
       </section>
@@ -156,7 +157,7 @@ export default function Landing() {
         <div className={styles.featuresInner}>
           <div className={styles.footerContent}>
             <div>
-              <div className={styles.footerBrand}>🔍 Missing Children System</div>
+              <div className={styles.footerBrand}>🔍 Missing Children Reporting System</div>
               <p className={styles.footerDesc}>AI-Enhanced Community-Based Missing Children Reporting and Tracking System</p>
               <p className={styles.footerDesc}>ISJ107V — Tshwane University of Technology · 2026</p>
             </div>
@@ -166,8 +167,8 @@ export default function Landing() {
             </div>
           </div>
           <div className={styles.footerBottom}>
-            <span>© 2026 Missing Children System · Built by Ntwanano Mathebula</span>
-            <span>Data source: Missing Children South Africa (2024)</span>
+            <span>© 2026 Missing Children Reporting System · Built by Ntwanano Mathebula</span>
+            <span>Statistics: Missing Children South Africa (2024)</span>
           </div>
         </div>
       </footer>
