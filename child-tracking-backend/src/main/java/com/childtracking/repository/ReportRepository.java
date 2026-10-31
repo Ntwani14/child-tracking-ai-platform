@@ -12,4 +12,6 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
     List<Report> findByStatus(String status);
     List<Report> findByLastSeenLocationContainingIgnoreCase(String location);
     List<Report> findByChildNameContainingIgnoreCase(String name);
+    List<Report> findByChildNameContainingIgnoreCaseAndStatus(String name, String status);
+    List<Report> findByLastSeenLocationContainingIgnoreCaseAndStatus(String location, String status);
 }

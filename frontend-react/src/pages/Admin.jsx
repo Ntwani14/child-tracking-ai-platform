@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import API from "../api/axios";
 import styles from "./Admin.module.css";
@@ -14,7 +14,7 @@ export default function Admin() {
     setLoading(true);
     const [f, r] = await Promise.all([
       API.get("/admin/duplicate-flags").catch(() => ({ data: [] })),
-      API.get("/reports").catch(() => ({ data: [] }))
+      API.get("/reports/all").catch(() => ({ data: [] }))
     ]);
     setFlags(f.data); setReports(r.data); setLoading(false);
   };

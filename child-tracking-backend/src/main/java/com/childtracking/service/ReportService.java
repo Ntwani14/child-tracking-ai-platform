@@ -83,14 +83,14 @@ public class ReportService {
     }
 
     public List<ReportResponse> searchByName(String name) {
-        return reportRepository.findByChildNameContainingIgnoreCase(name)
+        return reportRepository.findByChildNameContainingIgnoreCaseAndStatus(name, "active")
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<ReportResponse> searchByLocation(String location) {
-        return reportRepository.findByLastSeenLocationContainingIgnoreCase(location)
+        return reportRepository.findByLastSeenLocationContainingIgnoreCaseAndStatus(location, "active")
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
