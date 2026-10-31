@@ -1,7 +1,11 @@
-﻿import axios from "axios";
+import axios from "axios";
+
+// Base URL of the backend (used for API calls and image URLs). Configurable for deployment.
+export const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+export const imageUrl = (path) => `${BACKEND_URL}/api/images/${path}`;
 
 const API = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: BACKEND_URL + "/api",
 });
 
 // Attach JWT token to every request automatically

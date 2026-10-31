@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import API from "../api/axios";
+import API, { imageUrl } from "../api/axios";
 import styles from "./Dashboard.module.css";
 
 export default function Dashboard() {
@@ -142,7 +142,7 @@ export default function Dashboard() {
                     <span className={styles.date}>{new Date(r.dateLastSeen).toLocaleDateString("en-ZA",{day:"numeric",month:"short",year:"numeric"})}</span>
                   </div>
                   {r.imagePath && (
-                    <img src={`http://localhost:8080/api/images/${r.imagePath}`} alt={r.childName} className={styles.cardImg} />
+                    <img src={imageUrl(r.imagePath)} alt={r.childName} className={styles.cardImg} />
                   )}
                   <div className={styles.cardBody}>
                     <h3 className={styles.childName}>{r.childName}</h3>
@@ -190,7 +190,7 @@ export default function Dashboard() {
                 <div key={r.reportId} className={styles.foundCard}>
                   <div className={styles.foundBadge}>{"\u2713"} FOUND</div>
                   {r.imagePath && (
-                    <img src={`http://localhost:8080/api/images/${r.imagePath}`} alt={r.childName} className={styles.foundImg} />
+                    <img src={imageUrl(r.imagePath)} alt={r.childName} className={styles.foundImg} />
                   )}
                   <div className={styles.foundInfo}>
                     <div className={styles.foundName}>{r.childName}</div>

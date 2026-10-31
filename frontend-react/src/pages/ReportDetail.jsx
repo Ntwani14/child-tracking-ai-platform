@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import API from "../api/axios";
+import API, { imageUrl } from "../api/axios";
 import styles from "./ReportDetail.module.css";
 
 // Real brand logos as inline SVG (no external dependency needed)
@@ -123,7 +123,7 @@ export default function ReportDetail() {
 
           <div className={styles.body}>
             {report.imagePath
-              ? <img src={`http://localhost:8080/api/images/${report.imagePath}`} alt={report.childName} className={styles.photo} />
+              ? <img src={imageUrl(report.imagePath)} alt={report.childName} className={styles.photo} />
               : <div className={styles.noPhoto}>No photo uploaded</div>
             }
 

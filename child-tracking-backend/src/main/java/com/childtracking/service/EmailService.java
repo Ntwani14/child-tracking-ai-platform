@@ -26,6 +26,9 @@ public class EmailService {
     @Value("${app.email.from-name:MCRS Alerts}")
     private String fromName;
 
+    @Value("${app.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -82,7 +85,7 @@ public class EmailService {
             "  ID:       %s\n\n" +
             "Similarity score: %.1f%%\n\n" +
             "Review and resolve this flag here:\n" +
-            "http://localhost:3000/admin\n\n" +
+            frontendUrl + "/admin\n\n" +
             "---\n" +
             "Missing Children Reporting System (automated message)",
             newReport.getChildName(), newReport.getGender(), newReport.getAge(),
@@ -155,7 +158,7 @@ public class EmailService {
             "  - Contact your nearest police station, or call the South African\n" +
             "    Police Service on 10111, or Missing Children SA on 072 647 7464.\n\n" +
             "View the full report:\n" +
-            "http://localhost:3000/reports/%s\n\n" +
+            frontendUrl + "/reports/%s\n\n" +
             "---\n" +
             "Missing Children Reporting System\n" +
             "This is an automated alert. Please do not reply to this email.",

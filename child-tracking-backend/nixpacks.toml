@@ -1,0 +1,9 @@
+# Nixpacks build config for the Spring Boot backend on Railway
+[phases.setup]
+nixPkgs = ["jdk21", "maven"]
+
+[phases.build]
+cmds = ["mvn -q clean package -DskipTests"]
+
+[start]
+cmd = "java -jar target/child-tracking-backend-1.0.0.jar"
