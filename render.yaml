@@ -1,0 +1,65 @@
+# Render deployment blueprint for the Missing Children Reporting System
+
+databases:
+  - name: mcrs-db
+    databaseName: child_tracking_db
+    user: mcrs
+    plan: free
+
+services:
+  # Python AI duplicate-detection service
+  - type: web
+    name: mcrs-ai
+    runtime: python
+    plan: free
+    rootDir: ai-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_HOST
+        fromDatabase: { name: mcrs-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: mcrs-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: mcrs-db, property: database }
+      - key: DB_USER
+        fromDatabase: { name: mcrs-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: mcrs-db, property: password }
+
+  # Spring Boot backend
+  - type: web
+    name: mcrs-backend
+    runtime: docker
+    plan: free
+    rootDir: child-tracking-backend
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: DB_HOST
+        fromDatabase: { name: mcrs-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: mcrs-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: mcrs-db, property: database }
+      - key: DB_USERNAME
+        fromDatabase: { name: mcrs-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: mcrs-db, property: password }
+      - key: JPA_DDL_AUTO
+        value: update
+      - key: EMAIL_ENABLED
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+
+  # React frontend (static site)
+  - type: web
+    name: mcrs-frontend
+    runtime: static
+    rootDir: frontend-react
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
