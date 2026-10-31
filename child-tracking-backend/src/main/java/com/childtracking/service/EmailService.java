@@ -23,6 +23,9 @@ public class EmailService {
     @Value("${app.email.from:noreply@childtracking.co.za}")
     private String fromEmail;
 
+    @Value("${app.email.from-name:MCRS Alerts}")
+    private String fromName;
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -45,7 +48,7 @@ public class EmailService {
             if (user.getUserId().equals(report.getSubmittedBy().getUserId())) continue;
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom(fromEmail);
+                message.setFrom(senderFrom());
                 message.setTo(user.getEmail());
                 message.setSubject(subject);
                 message.setText(body);
@@ -91,7 +94,7 @@ public class EmailService {
         for (User admin : admins) {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom(fromEmail);
+                message.setFrom(senderFrom());
                 message.setTo(admin.getEmail());
                 message.setSubject(subject);
                 message.setText(body);
@@ -115,7 +118,7 @@ public class EmailService {
             if (user.getEmail() == null || user.getEmail().isBlank()) continue;
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom(fromEmail);
+                message.setFrom(senderFrom());
                 message.setTo(user.getEmail());
                 message.setSubject(subject);
                 message.setText(body);
@@ -206,7 +209,7 @@ public class EmailService {
         );
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
+            message.setFrom(senderFrom());
             message.setTo(user.getEmail());
             message.setSubject(subject);
             message.setText(body);
@@ -217,5 +220,17 @@ public class EmailService {
             logger.warning("Failed to send reset email to " + user.getEmail() + ": " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Builds the "From" value with a friendly display name, e.g.
+     * "Missing Children System <ntwano14@gmail.com>". Falls back to the raw
+     * address if the name is blank.
+     */
+    private String senderFrom() {
+        if (fromName == null || fromName.isBlank()) {
+            return fromEmail;
+        }
+        return fromName + " <" + fromEmail + ">";
     }
 }
