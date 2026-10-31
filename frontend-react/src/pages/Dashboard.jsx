@@ -33,7 +33,8 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const { data } = await API.get("/reports/all");
-      setAllReports(data);
+      // Community view excludes internal "duplicate" reports (admin-only concept)
+      setAllReports(data.filter(r => r.status !== "duplicate"));
     } catch { setAllReports([]); }
     setLoading(false);
   };
@@ -106,7 +107,6 @@ export default function Dashboard() {
               <option value="active">Active Only</option>
               <option value="">All Statuses</option>
               <option value="found">Found</option>
-              <option value="duplicate">Duplicate</option>
             </select>
             <input className={styles.ageInput} type="number" placeholder="Min age" min="0" max="18"
               value={minAge} onChange={e => setMinAge(e.target.value)} />
