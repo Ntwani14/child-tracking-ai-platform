@@ -9,9 +9,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 public class NotificationService {
+
+    private static final Logger logger = Logger.getLogger(NotificationService.class.getName());
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
