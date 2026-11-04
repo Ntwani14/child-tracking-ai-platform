@@ -63,7 +63,9 @@ public class NotificationService {
      */
     @Async
     public void sendFoundNotification(Report report) {
+        logger.info("sendFoundNotification called for report: " + report.getReportId());
         List<User> allUsers = userRepository.findAll();
+        logger.info("Found " + allUsers.size() + " users to notify");
 
         String message = "GREAT NEWS! " + report.getChildName() +
                 " (" + report.getGender() + ", " + report.getAge() + " years old) " +
@@ -78,9 +80,16 @@ public class NotificationService {
             notification.setMessage(message);
             notificationRepository.save(notification);
         }
+        logger.info("In-app notifications saved for " + allUsers.size() + " users");
 
-        // Send email to all users
-        emailService.sendFoundEmails(report, allUsers);
+        // Send email to all users (async, runs in background)
+        try {
+            emailService.sendFoundEmails(report, allUsers);
+            logger.info("Email send initiated for found notification");
+        } catch (Exception e) {
+            logger.severe("FAILED to send found emails: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public List<Notification> getNotificationsForUser(User user) {

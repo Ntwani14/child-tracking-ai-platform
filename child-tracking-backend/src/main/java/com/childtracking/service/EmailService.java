@@ -120,14 +120,24 @@ public class EmailService {
      * Sends good-news email to all users when a child is found.
      */
     public void sendFoundEmails(Report report, List<User> users) {
-        if (!emailEnabled) return;
+        logger.info("sendFoundEmails called. emailEnabled=" + emailEnabled + ", users=" + users.size());
+        
+        if (!emailEnabled) {
+            logger.warning("Email notifications are DISABLED. Set EMAIL_ENABLED=true to enable.");
+            return;
+        }
 
         List<String> addresses = users.stream()
                 .filter(u -> u.getEmail() != null && !u.getEmail().isBlank())
                 .map(User::getEmail)
                 .collect(java.util.stream.Collectors.toList());
 
-        if (addresses.isEmpty()) return;
+        logger.info("Filtered to " + addresses.size() + " valid email addresses: " + String.join(", ", addresses));
+
+        if (addresses.isEmpty()) {
+            logger.warning("No valid email addresses to send to");
+            return;
+        }
 
         String subject = "GOOD NEWS: " + report.getChildName() + " has been found safe";
         String body = buildFoundBody(report);
@@ -142,10 +152,13 @@ public class EmailService {
             }
             message.setSubject(subject);
             message.setText(body);
+            
+            logger.info("Sending email from=" + senderFrom() + " to=" + addresses.get(0) + " bcc=" + (addresses.size() - 1) + " others");
             mailSender.send(message);
-            logger.info("Found email sent to " + addresses.size() + " users (BCC).");
+            logger.info("✓ Found email sent successfully to " + addresses.size() + " users (BCC).");
         } catch (Exception e) {
-            logger.warning("Failed to send found emails: " + e.getMessage());
+            logger.severe("✗ FAILED to send found emails: " + e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
