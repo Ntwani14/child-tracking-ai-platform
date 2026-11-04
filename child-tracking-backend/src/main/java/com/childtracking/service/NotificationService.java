@@ -5,6 +5,7 @@ import com.childtracking.model.Report;
 import com.childtracking.model.User;
 import com.childtracking.repository.NotificationRepository;
 import com.childtracking.repository.UserRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +29,11 @@ public class NotificationService {
      * Sends a missing-child alert to ALL registered users (community-wide alert),
      * regardless of their saved location. The user who submitted the report is skipped.
      */
+    /**
+     * Send alert notifications when a new report is submitted.
+     * Saves in-app notifications synchronously, sends emails asynchronously.
+     */
+    @Async
     public void sendAlertNotifications(Report report) {
         List<User> allUsers = userRepository.findAll();
 
@@ -51,6 +57,11 @@ public class NotificationService {
     }
 
 
+    /**
+     * Send "found" notifications when a child is marked safe.
+     * Saves in-app notifications synchronously, sends emails asynchronously.
+     */
+    @Async
     public void sendFoundNotification(Report report) {
         List<User> allUsers = userRepository.findAll();
 
