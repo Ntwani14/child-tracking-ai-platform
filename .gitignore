@@ -48,3 +48,6 @@ frontend-react/dist/
 
 # Microsoft Office temp/lock files
 ~$*
+
+# Node modules
+frontend-react/node_modules/

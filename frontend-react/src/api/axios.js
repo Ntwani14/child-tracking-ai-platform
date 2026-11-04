@@ -2,7 +2,13 @@ import axios from "axios";
 
 // Base URL of the backend (used for API calls and image URLs). Configurable for deployment.
 export const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-export const imageUrl = (path) => `${BACKEND_URL}/api/images/${path}`;
+// If path is already a full URL (Cloudinary), use it directly.
+// If it is a legacy local filename, proxy it through the backend.
+export const imageUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return `${BACKEND_URL}/api/images/${path}`;
+};
 
 const API = axios.create({
   baseURL: BACKEND_URL + "/api",
