@@ -28,6 +28,12 @@ services:
         fromDatabase: { name: mcrs-db, property: user }
       - key: DB_PASSWORD
         fromDatabase: { name: mcrs-db, property: password }
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        value: mcrs.alerts@gmail.com
 
   # Spring Boot backend
   - type: web
