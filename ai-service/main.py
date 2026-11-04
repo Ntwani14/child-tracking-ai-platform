@@ -4,6 +4,10 @@ from pydantic import BaseModel
 from typing import List, Optional
 import psycopg2
 import os
+import smtplib
+import ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -176,6 +180,74 @@ def detect_duplicate_endpoint(request: DetectDuplicateRequest):
         match=None,
         message=f"No duplicate found — highest similarity was {round(score * 100, 1)}%"
     )
+
+
+# ---- Email Sending Endpoint ----
+
+class EmailRequest(BaseModel):
+    recipients: List[str]
+    subject: str
+    body: str
+
+class EmailResponse(BaseModel):
+    success: bool
+    sent: int
+    failed: int
+    message: str
+
+@app.post("/send-email", response_model=EmailResponse)
+def send_email(request: EmailRequest):
+    """
+    Send email to a list of recipients via Gmail SMTP.
+    Called by the Java backend to offload email sending.
+    """
+    mail_user = os.getenv("MAIL_USERNAME", "")
+    mail_pass = os.getenv("MAIL_PASSWORD", "")
+    mail_from = os.getenv("MAIL_FROM", mail_user)
+
+    if not mail_user or not mail_pass:
+        return EmailResponse(success=False, sent=0, failed=len(request.recipients),
+                             message="Email credentials not configured")
+
+    sent = 0
+    failed = 0
+
+    # Try port 587 first, fall back to 465
+    for recipient in request.recipients:
+        try:
+            msg = MIMEMultipart()
+            msg["From"] = f"MCRS Alerts <{mail_from}>"
+            msg["To"] = recipient
+            msg["Subject"] = request.subject
+            msg.attach(MIMEText(request.body, "plain"))
+
+            try:
+                # Try STARTTLS on port 587
+                with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
+                    server.ehlo()
+                    server.starttls(context=ssl.create_default_context())
+                    server.login(mail_user, mail_pass)
+                    server.sendmail(mail_from, recipient, msg.as_string())
+            except Exception:
+                # Fall back to SSL on port 465
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=15) as server:
+                    server.login(mail_user, mail_pass)
+                    server.sendmail(mail_from, recipient, msg.as_string())
+
+            sent += 1
+            print(f"✓ Email sent to {recipient}")
+        except Exception as e:
+            failed += 1
+            print(f"✗ Failed to send to {recipient}: {e}")
+
+    return EmailResponse(
+        success=failed == 0,
+        sent=sent,
+        failed=failed,
+        message=f"Sent {sent}, failed {failed}"
+    )
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
