@@ -8,6 +8,7 @@ import com.childtracking.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 @Service
@@ -28,17 +29,13 @@ public class NotificationService {
     }
 
     /**
-     * Sends a missing-child alert to ALL registered users (community-wide alert),
-     * regardless of their saved location. The user who submitted the report is skipped.
-     */
-    /**
      * Send alert notifications when a new report is submitted.
-     * Saves in-app notifications and sends emails.
+     * In-app notifications saved synchronously, emails sent in a background thread.
      */
     public void sendAlertNotifications(Report report) {
         List<User> allUsers = userRepository.findAll();
 
-        // Save in-app notifications for every user except the submitter
+        // Save in-app notifications synchronously
         for (User user : allUsers) {
             if (user.getUserId().equals(report.getSubmittedBy().getUserId())) continue;
             Notification notification = new Notification();
@@ -53,26 +50,35 @@ public class NotificationService {
             notificationRepository.save(notification);
         }
 
-        // Send email alerts to all users (EmailService skips the submitter and blank emails)
-        emailService.sendAlertEmails(report, allUsers);
+        // Fire email in a true background thread — does NOT block the HTTP response
+        final List<User> recipients = allUsers;
+        final Report reportRef = report;
+        CompletableFuture.runAsync(() -> {
+            try {
+                logger.info("Background thread: sending alert emails for " + reportRef.getChildName());
+                emailService.sendAlertEmails(reportRef, recipients);
+                logger.info("Background thread: alert emails done");
+            } catch (Exception e) {
+                logger.severe("Background thread: alert email failed: " + e.getMessage());
+            }
+        });
     }
 
-
     /**
-     * Send "found" notifications when a child is marked safe.
-     * Saves in-app notifications and sends emails.
+     * Send found notifications when a child is marked safe.
+     * In-app notifications saved synchronously, emails sent in a background thread.
      */
     public void sendFoundNotification(Report report) {
-        logger.info("sendFoundNotification called for report: " + report.getReportId());
+        logger.info("sendFoundNotification called for: " + report.getChildName());
         List<User> allUsers = userRepository.findAll();
-        logger.info("Found " + allUsers.size() + " users to notify");
+        logger.info("Users to notify: " + allUsers.size());
 
         String message = "GREAT NEWS! " + report.getChildName() +
                 " (" + report.getGender() + ", " + report.getAge() + " years old) " +
                 "who was last seen at " + report.getLastSeenLocation() +
                 " has been FOUND safely. Thank you to everyone who helped!";
 
-        // Save in-app notification for all users
+        // Save in-app notifications synchronously
         for (User user : allUsers) {
             Notification notification = new Notification();
             notification.setUser(user);
@@ -80,16 +86,22 @@ public class NotificationService {
             notification.setMessage(message);
             notificationRepository.save(notification);
         }
-        logger.info("In-app notifications saved for " + allUsers.size() + " users");
+        logger.info("In-app notifications saved. Firing email in background...");
 
-        // Send email to all users
-        try {
-            emailService.sendFoundEmails(report, allUsers);
-            logger.info("Email send completed for found notification");
-        } catch (Exception e) {
-            logger.severe("FAILED to send found emails: " + e.getMessage());
-            e.printStackTrace();
-        }
+        // Fire email in a true background thread — does NOT block the HTTP response
+        final List<User> recipients = allUsers;
+        final Report reportRef = report;
+        CompletableFuture.runAsync(() -> {
+            try {
+                logger.info("Background thread: sending found emails for " + reportRef.getChildName());
+                emailService.sendFoundEmails(reportRef, recipients);
+                logger.info("Background thread: found emails done");
+            } catch (Exception e) {
+                logger.severe("Background thread: found email failed: " + e.getMessage());
+            }
+        });
+
+        logger.info("sendFoundNotification returning immediately — email fires in background");
     }
 
     public List<Notification> getNotificationsForUser(User user) {
