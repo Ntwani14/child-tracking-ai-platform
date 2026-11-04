@@ -18,7 +18,7 @@ export default function Landing() {
       {/* Navbar */}
       <nav className={styles.nav}>
         <div className={styles.navBrand}>
-          <span className={styles.navIcon}>🔍</span>
+          <img src="/logo.png" alt="MCRS Logo" className={styles.navLogo} />
           <span>Missing Children Reporting System</span>
         </div>
         <div className={styles.navLinks}>
@@ -31,6 +31,9 @@ export default function Landing() {
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <div className={styles.heroBadge}>🇿🇦 South Africa</div>
+          <div className={styles.heroLogoRow}>
+            <img src="/logo.png" alt="MCRS Logo" className={styles.heroLogo} />
+          </div>
           <h1 className={styles.heroTitle}>
             Every Second Counts.<br />
             <span className={styles.heroAccent}>Help Find Missing Children.</span>
@@ -157,7 +160,7 @@ export default function Landing() {
         <div className={styles.featuresInner}>
           <div className={styles.footerContent}>
             <div>
-              <div className={styles.footerBrand}>🔍 Missing Children Reporting System</div>
+              <div className={styles.footerBrand}><img src="/logo.png" alt="MCRS" className={styles.footerLogo} /> Missing Children Reporting System</div>
               <p className={styles.footerDesc}>AI-Enhanced Community-Based Missing Children Reporting and Tracking System</p>
               <p className={styles.footerDesc}>ISJ107V — Tshwane University of Technology · 2026</p>
             </div>

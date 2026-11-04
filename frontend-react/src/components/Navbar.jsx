@@ -31,7 +31,7 @@ export default function Navbar() {
   return (
     <nav className={styles.navbar}>
       <div className={styles.brand}>
-        <span className={styles.brandIcon}>🔍</span>
+        <img src="/logo.png" alt="MCRS Logo" className={styles.brandLogo} />
         <span className={styles.brandText}>Missing Children System</span>
       </div>
 

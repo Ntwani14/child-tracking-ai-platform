@@ -3,7 +3,7 @@
 /* Navbar */
 .nav { background: rgba(26,60,110,0.97); backdrop-filter: blur(10px); padding: 0 48px; height: 68px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,0.15); }
 .navBrand { display: flex; align-items: center; gap: 10px; color: white; font-size: 1.1rem; font-weight: 700; }
-.navIcon { font-size: 1.4rem; }
+.navLogo { width: 34px; height: 34px; border-radius: 50%; object-fit: contain; flex-shrink: 0; }
 .navLinks { display: flex; align-items: center; gap: 12px; }
 .navLogin { color: rgba(255,255,255,0.85); padding: 8px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; transition: all 0.2s; }
 .navLogin:hover { background: rgba(255,255,255,0.1); color: white; }
@@ -70,7 +70,8 @@
 /* Footer */
 .footer { background: #0d1f3c; padding: 48px; }
 .footerContent { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
-.footerBrand { color: white; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+.footerBrand { display: flex; align-items: center; gap: 8px; color: white; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+.footerLogo { width: 26px; height: 26px; border-radius: 50%; object-fit: contain; flex-shrink: 0; }
 .footerDesc { color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-top: 4px; }
 .footerLinks { display: flex; gap: 24px; }
 .footerLinks a { color: rgba(255,255,255,0.5); font-size: 0.85rem; transition: color 0.2s; }
@@ -92,3 +93,7 @@
   .nav { padding: 0 20px; }
   .features, .howItWorks, .ctaBanner, .footer { padding: 60px 24px; }
 }
+
+/* Hero logo */
+.heroLogoRow { margin-bottom: 20px; }
+.heroLogo { width: 88px; height: 88px; border-radius: 50%; box-shadow: 0 8px 32px rgba(0,0,0,0.25); object-fit: contain; }
