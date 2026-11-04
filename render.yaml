@@ -50,7 +50,19 @@ services:
       - key: JPA_DDL_AUTO
         value: update
       - key: EMAIL_ENABLED
-        value: "false"
+        value: "true"
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false  # Set manually in Render dashboard for security
+      - key: MAIL_PASSWORD
+        sync: false  # Set manually in Render dashboard for security
+      - key: MAIL_FROM
+        value: mcrs.alerts@gmail.com
+      - key: MAIL_FROM_NAME
+        value: MCRS Alerts
       - key: JWT_SECRET
         generateValue: true
 
