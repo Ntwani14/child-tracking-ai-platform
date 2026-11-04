@@ -1,7 +1,7 @@
 # AI-Enhanced Community-Based Missing Children Reporting and Tracking System
 
 > ISJ107V — Integrated Software Project 2026  
-> Tshwane University of Technology | N Mathebula (216080254)
+> Tshwane University of Technology | N Mathebula
 
 ---
 
@@ -69,9 +69,11 @@ React Frontend  ──HTTPS──►  Spring Boot Backend  ──JDBC──►  
 
 | Role | Email | Password |
 |---|---|---|
-| Administrator | masingitamathebula89@gmail.com | password123 |
-| Community member | hluri05m@gmail.com | password123 |
-| Community member | ntwano14@gmail.com | password123 |
+| Administrator | masingitamathebula89@gmail.com | `contact owner` |
+| Community member | hluri05m@gmail.com | `contact owner` |
+| Community member | ntwano14@gmail.com | `contact owner` |
+
+> Credentials are available on request for assessment purposes.
 
 ---
 
@@ -180,7 +182,7 @@ The Python microservice receives each new report's text fields (name, descriptio
 - **Module:** ISJ107V — Integrated Software Project (2026)
 - **Institution:** Tshwane University of Technology
 - **Qualification:** Advanced Diploma in Computer Science (NQF Level 7)
-- **Student:** N Mathebula — 216080254
+- **Student:** N Mathebula
 
 ---
 
