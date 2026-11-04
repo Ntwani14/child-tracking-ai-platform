@@ -42,24 +42,32 @@ public class EmailService {
             return;
         }
 
+        // Collect all recipient addresses, excluding the submitter
+        List<String> addresses = users.stream()
+                .filter(u -> u.getEmail() != null && !u.getEmail().isBlank())
+                .filter(u -> !u.getUserId().equals(report.getSubmittedBy().getUserId()))
+                .map(User::getEmail)
+                .collect(java.util.stream.Collectors.toList());
+
+        if (addresses.isEmpty()) return;
+
         String subject = "MISSING CHILD ALERT: " + report.getChildName() + " (" + report.getAge() + ", last seen " + report.getLastSeenLocation() + ")";
         String body = buildAlertBody(report);
 
-        for (User user : users) {
-            if (user.getEmail() == null || user.getEmail().isBlank()) continue;
-            // Skip the person who submitted the report
-            if (user.getUserId().equals(report.getSubmittedBy().getUserId())) continue;
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom(senderFrom());
-                message.setTo(user.getEmail());
-                message.setSubject(subject);
-                message.setText(body);
-                mailSender.send(message);
-                logger.info("Alert email sent to: " + user.getEmail());
-            } catch (Exception e) {
-                logger.warning("Failed to send email to " + user.getEmail() + ": " + e.getMessage());
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(senderFrom());
+            // Send to first address, BCC the rest — one SMTP call reaches everyone
+            message.setTo(addresses.get(0));
+            if (addresses.size() > 1) {
+                message.setBcc(addresses.subList(1, addresses.size()).toArray(new String[0]));
             }
+            message.setSubject(subject);
+            message.setText(body);
+            mailSender.send(message);
+            logger.info("Alert email sent to " + addresses.size() + " users (BCC).");
+        } catch (Exception e) {
+            logger.warning("Failed to send alert emails: " + e.getMessage());
         }
     }
 
@@ -114,22 +122,30 @@ public class EmailService {
     public void sendFoundEmails(Report report, List<User> users) {
         if (!emailEnabled) return;
 
+        List<String> addresses = users.stream()
+                .filter(u -> u.getEmail() != null && !u.getEmail().isBlank())
+                .map(User::getEmail)
+                .collect(java.util.stream.Collectors.toList());
+
+        if (addresses.isEmpty()) return;
+
         String subject = "GOOD NEWS: " + report.getChildName() + " has been found safe";
         String body = buildFoundBody(report);
 
-        for (User user : users) {
-            if (user.getEmail() == null || user.getEmail().isBlank()) continue;
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom(senderFrom());
-                message.setTo(user.getEmail());
-                message.setSubject(subject);
-                message.setText(body);
-                mailSender.send(message);
-                logger.info("Found email sent to: " + user.getEmail());
-            } catch (Exception e) {
-                logger.warning("Failed to send found email to " + user.getEmail() + ": " + e.getMessage());
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(senderFrom());
+            // Send to first address, BCC the rest — one SMTP call reaches everyone
+            message.setTo(addresses.get(0));
+            if (addresses.size() > 1) {
+                message.setBcc(addresses.subList(1, addresses.size()).toArray(new String[0]));
             }
+            message.setSubject(subject);
+            message.setText(body);
+            mailSender.send(message);
+            logger.info("Found email sent to " + addresses.size() + " users (BCC).");
+        } catch (Exception e) {
+            logger.warning("Failed to send found emails: " + e.getMessage());
         }
     }
 
