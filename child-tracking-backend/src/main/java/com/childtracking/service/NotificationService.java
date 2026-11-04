@@ -5,7 +5,6 @@ import com.childtracking.model.Report;
 import com.childtracking.model.User;
 import com.childtracking.repository.NotificationRepository;
 import com.childtracking.repository.UserRepository;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,9 +33,8 @@ public class NotificationService {
      */
     /**
      * Send alert notifications when a new report is submitted.
-     * Saves in-app notifications synchronously, sends emails asynchronously.
+     * Saves in-app notifications and sends emails.
      */
-    @Async
     public void sendAlertNotifications(Report report) {
         List<User> allUsers = userRepository.findAll();
 
@@ -62,9 +60,8 @@ public class NotificationService {
 
     /**
      * Send "found" notifications when a child is marked safe.
-     * Saves in-app notifications synchronously, sends emails asynchronously.
+     * Saves in-app notifications and sends emails.
      */
-    @Async
     public void sendFoundNotification(Report report) {
         logger.info("sendFoundNotification called for report: " + report.getReportId());
         List<User> allUsers = userRepository.findAll();
@@ -85,10 +82,10 @@ public class NotificationService {
         }
         logger.info("In-app notifications saved for " + allUsers.size() + " users");
 
-        // Send email to all users (async, runs in background)
+        // Send email to all users
         try {
             emailService.sendFoundEmails(report, allUsers);
-            logger.info("Email send initiated for found notification");
+            logger.info("Email send completed for found notification");
         } catch (Exception e) {
             logger.severe("FAILED to send found emails: " + e.getMessage());
             e.printStackTrace();
