@@ -34,6 +34,7 @@ export default function ReportDetail() {
   const [copied, setCopied] = useState(false);
   const [tiktokCopied, setTiktokCopied] = useState(false);
   const [marking, setMarking] = useState(false);
+  const [markingMsg, setMarkingMsg] = useState("Updating...");
   const [marked, setMarked] = useState(false);
   const [showFoundModal, setShowFoundModal] = useState(false);
   const [foundNote, setFoundNote] = useState("");
@@ -87,14 +88,24 @@ export default function ReportDetail() {
 
   const confirmFound = async () => {
     setMarking(true);
+    setMarkingMsg("Updating...");
+    // After 4 seconds still waiting, update the message
+    const slowTimer = setTimeout(() => setMarkingMsg("Sending notifications..."), 4000);
     try {
-      const { data } = await API.put(`/reports/${id}/found`, { foundNote });
+      const { data } = await API.put(`/reports/${id}/found`, { foundNote }, { timeout: 60000 });
       setReport(data);
       setMarked(true);
       setShowFoundModal(false);
     } catch (err) {
-      alert(err.response?.data?.error || "Failed to update report.");
-    } finally { setMarking(false); }
+      if (err.code === "ECONNABORTED" || err.message?.includes("timeout")) {
+        alert("The server is waking up — please try again in 30 seconds.");
+      } else {
+        alert(err.response?.data?.error || "Failed to update report.");
+      }
+    } finally {
+      clearTimeout(slowTimer);
+      setMarking(false);
+    }
   };
 
   if (loading) return <div><Navbar /><div className={styles.loading}>Loading...</div></div>;
@@ -218,7 +229,7 @@ export default function ReportDetail() {
             <div className={styles.modalActions}>
               <button className={styles.modalCancel} onClick={() => setShowFoundModal(false)} disabled={marking}>Cancel</button>
               <button className={styles.modalConfirm} onClick={confirmFound} disabled={marking}>
-                {marking ? "Updating..." : "Confirm — Child Is Safe"}
+                {marking ? markingMsg : "Confirm — Child Is Safe"}
               </button>
             </div>
           </div>

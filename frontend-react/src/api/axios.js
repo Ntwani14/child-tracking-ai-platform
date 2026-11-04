@@ -12,6 +12,7 @@ export const imageUrl = (path) => {
 
 const API = axios.create({
   baseURL: BACKEND_URL + "/api",
+  timeout: 60000, // 60 seconds — handles Render free tier cold start
 });
 
 // Attach JWT token to every request automatically
