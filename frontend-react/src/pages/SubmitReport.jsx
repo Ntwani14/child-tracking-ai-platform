@@ -61,7 +61,7 @@ export default function SubmitReport() {
               </div>
               <div className={styles.field}>
                 <label>Age *</label>
-                <input required type="number" min="0" max="18" placeholder="Age" value={form.age} onChange={e=>setForm({...form,age:e.target.value})} />
+                <input required type="number" min="0" max="17" placeholder="Age" value={form.age} onChange={e=>setForm({...form,age:e.target.value})} />
               </div>
             </div>
             <div className={styles.row}>

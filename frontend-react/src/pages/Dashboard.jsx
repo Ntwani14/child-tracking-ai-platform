@@ -108,9 +108,9 @@ export default function Dashboard() {
               <option value="">All Statuses</option>
               <option value="found">Found</option>
             </select>
-            <input className={styles.ageInput} type="number" placeholder="Min age" min="0" max="18"
+            <input className={styles.ageInput} type="number" placeholder="Min age" min="0" max="17"
               value={minAge} onChange={e => setMinAge(e.target.value)} />
-            <input className={styles.ageInput} type="number" placeholder="Max age" min="0" max="18"
+            <input className={styles.ageInput} type="number" placeholder="Max age" min="0" max="17"
               value={maxAge} onChange={e => setMaxAge(e.target.value)} />
           </div>
         </div>
