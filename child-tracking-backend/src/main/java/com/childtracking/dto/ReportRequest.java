@@ -16,7 +16,7 @@ public class ReportRequest {
 
     @NotNull(message = "Age is required")
     @Min(value = 0, message = "Age cannot be negative")
-    @Max(value = 17, message = "This platform is for missing children (age 17 or under)")
+    @Max(value = 18, message = "This platform is for missing children (age 18 or under)")
     private Integer age;
 
     @NotBlank(message = "Gender is required")

@@ -22,11 +22,12 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// Redirect to login on 401/403
+// Redirect to login only on 401 (token expired or missing)
+// 403 means forbidden (e.g. validation error or wrong role) — do NOT log out
 API.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401 || err.response?.status === 403) {
+    if (err.response?.status === 401) {
       localStorage.clear();
       window.location.href = "/login";
     }
