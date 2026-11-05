@@ -13,7 +13,19 @@ export default function SubmitReport() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const today = new Date().toISOString().split("T")[0];
+  const [ageError, setAgeError] = useState("");
+
+  const handleAgeChange = (e) => {
+    const val = e.target.value;
+    setForm({ ...form, age: val });
+    if (val === "") {
+      setAgeError("");
+    } else if (parseInt(val) < 0 || parseInt(val) > 17) {
+      setAgeError("Age must be between 0 and 17.");
+    } else {
+      setAgeError("");
+    }
+  };
 
   const handlePhoto = (e) => {
     const file = e.target.files[0];
@@ -24,6 +36,7 @@ export default function SubmitReport() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (ageError) return;
     setError(""); setLoading(true);
     try {
       let imagePath = null;
@@ -61,7 +74,9 @@ export default function SubmitReport() {
               </div>
               <div className={styles.field}>
                 <label>Age *</label>
-                <input required type="number" min="0" max="17" placeholder="Age" value={form.age} onChange={e=>setForm({...form,age:e.target.value})} />
+                <input required type="number" min="0" max="17" placeholder="Age (0 - 17)"
+                  value={form.age} onChange={handleAgeChange} />
+                {ageError && <span className={styles.fieldError}>{ageError}</span>}
               </div>
             </div>
             <div className={styles.row}>
