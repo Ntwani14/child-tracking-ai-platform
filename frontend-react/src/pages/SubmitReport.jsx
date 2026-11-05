@@ -14,6 +14,7 @@ export default function SubmitReport() {
   const [success, setSuccess] = useState("");
 
   const [ageError, setAgeError] = useState("");
+  const today = new Date().toISOString().split("T")[0];
 
   const handleAgeChange = (e) => {
     const val = e.target.value;
