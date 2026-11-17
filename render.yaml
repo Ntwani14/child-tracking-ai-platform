@@ -11,7 +11,7 @@ services:
   - type: web
     name: mcrs-ai
     runtime: python
-    plan: free
+    plan: starter
     rootDir: ai-service
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
@@ -39,7 +39,7 @@ services:
   - type: web
     name: mcrs-backend
     runtime: docker
-    plan: free
+    plan: starter
     rootDir: child-tracking-backend
     dockerfilePath: Dockerfile
     envVars:
