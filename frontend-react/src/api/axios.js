@@ -22,12 +22,15 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// Redirect to login only on 401 (token expired or missing)
-// 403 means forbidden (e.g. validation error or wrong role) — do NOT log out
+// Redirect to login only on 401 (token expired or missing).
+// 403 means logged in but not allowed (wrong role) — do NOT log out.
+// Auth requests (login, register, reset) are skipped: a 401 there means wrong
+// details, and the page must stay put so it can show the error message.
 API.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const isAuthRequest = err.config?.url?.startsWith("/auth/");
+    if (err.response?.status === 401 && !isAuthRequest) {
       localStorage.clear();
       window.location.href = "/login";
     }
