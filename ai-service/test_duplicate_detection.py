@@ -1,8 +1,12 @@
-﻿from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+﻿import inspect
 
-THRESHOLD = 0.25
+# Test the production code directly: this is the same function the
+# /api/detect-duplicate endpoint calls on the live server.
+from main import detect_duplicate
+
+# Threshold is read from the production function, so the test can never
+# drift from what the server actually uses.
+THRESHOLD = inspect.signature(detect_duplicate).parameters["threshold"].default
 
 existing_reports = [
     {"id": "R001", "text": "Lebo Dlamini female 8 short dark skin red dress Soshanguve Block H near school"},
@@ -44,14 +48,11 @@ non_duplicate_tests = [
 ]
 
 def check_duplicate(new_text, existing):
-    all_texts = [new_text] + [r["text"] for r in existing]
-    vectorizer = TfidfVectorizer(analyzer="word", ngram_range=(1, 2), min_df=1)
-    tfidf = vectorizer.fit_transform(all_texts)
-    scores = cosine_similarity(tfidf[0:1], tfidf[1:]).flatten()
-    best_idx = int(np.argmax(scores))
-    best_score = float(scores[best_idx])
-    matched_id = existing[best_idx]["id"]
-    return best_score, matched_id
+    """Run the production detect_duplicate() and return (score, flagged, matched_id)."""
+    matched, score = detect_duplicate(new_text, existing)
+    flagged = matched is not None
+    matched_id = matched["id"] if flagged else "-"
+    return score, flagged, matched_id
 
 def run_evaluation():
     print("=" * 70)
@@ -65,8 +66,7 @@ def run_evaluation():
 
     print("\n--- DUPLICATE TESTS (expected: FLAGGED) ---")
     for i, test in enumerate(duplicate_tests, 1):
-        score, matched = check_duplicate(test["new"], existing_reports)
-        flagged = score >= THRESHOLD
+        score, flagged, matched = check_duplicate(test["new"], existing_reports)
         correct = flagged and matched == test["expected"]
         if correct: tp += 1
         else: fn += 1
@@ -75,8 +75,7 @@ def run_evaluation():
 
     print("\n--- NON-DUPLICATE TESTS (expected: NOT FLAGGED) ---")
     for i, new in enumerate(non_duplicate_tests, 1):
-        score, matched = check_duplicate(new, existing_reports)
-        flagged = score >= THRESHOLD
+        score, flagged, matched = check_duplicate(new, existing_reports)
         correct = not flagged
         if correct: tn += 1
         else: fp += 1
