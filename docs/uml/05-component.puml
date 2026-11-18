@@ -1,0 +1,43 @@
+@startuml component
+' Component view - application modules, data stores and external services
+skinparam shadowing false
+skinparam componentBackgroundColor #F2F6FC
+skinparam componentBorderColor #1A3C6E
+
+package "React Frontend (mcrs-frontend)" {
+  [Pages\n(Dashboard, SubmitReport,\nReportDetail, Admin, Analytics)] as Pages
+  [AuthContext\n(JWT in localStorage)] as Auth
+  [API client\n(axios.js)] as Axios
+  [Service worker\n(PWA)] as SW
+}
+
+package "Spring Boot Backend (mcrs-backend)" {
+  [Security\n(SecurityConfig, JwtAuthFilter)] as Sec
+  [Controllers\n(Auth, Report, Admin, Image,\nNotification, Analytics)] as Ctrl
+  [Services\n(ReportService, AiDuplicateService,\nNotificationService, EmailService)] as Svc
+  [Repositories\n(Spring Data JPA)] as Repo
+}
+
+package "AI Service (mcrs-ai, FastAPI)" {
+  [/api/detect-duplicate\n(TF-IDF + cosine similarity)] as Detect
+  [/send-email\n(smtplib)] as SendMail
+}
+
+database "PostgreSQL (mcrs-db)" as DB
+cloud "Cloudinary\n(image storage)" as CDN
+cloud "Gmail SMTP" as SMTP
+
+Pages --> Auth
+Pages --> Axios
+Axios --> Sec : HTTPS REST/JSON + JWT
+Sec --> Ctrl
+Ctrl --> Svc
+Svc --> Repo
+Repo --> DB : JDBC
+Ctrl --> CDN : upload photo
+Pages ..> CDN : load images (HTTPS)
+Svc --> Detect : HTTPS REST/JSON
+Svc --> SendMail : HTTPS REST/JSON
+Detect --> DB : psycopg2 (read active reports)
+SendMail --> SMTP : SMTP (TLS)
+@enduml

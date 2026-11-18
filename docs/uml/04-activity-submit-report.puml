@@ -1,0 +1,44 @@
+@startuml activity-submit-report
+' Activity diagram - report submission workflow, including the AI step and alternative paths
+skinparam shadowing false
+start
+:Member opens "Report Missing Child" form;
+:Enter child details (and optional photo);
+if (Client validation passes?\n(required fields, age 0-17)) then (no)
+  :Show inline error;
+  stop
+else (yes)
+endif
+if (Photo selected?) then (yes)
+  :Upload photo to Cloudinary;
+  :Store returned URL as imagePath;
+else (no)
+endif
+:POST report to backend with JWT;
+if (Server validation passes?) then (no)
+  :Return HTTP 400 with message;
+  :Show error, form data kept;
+  stop
+else (yes)
+endif
+:Save report to PostgreSQL (status = active);
+:Call AI duplicate-detection service;
+if (AI service reachable?) then (yes)
+  :Compute TF-IDF + cosine similarity\nagainst active reports;
+  if (Score >= 0.25?) then (yes)
+    :Create DuplicateFlag for admin review;
+  else (no)
+    :No flag created;
+  endif
+else (no)
+  :Log failure, skip duplicate check;
+endif
+:Save in-app notifications\n(all users except submitter);
+fork
+  :Return confirmation;
+  :Show report on dashboard;
+fork again
+  :Send alert emails in background\n(via AI service -> Gmail SMTP);
+end fork
+stop
+@enduml

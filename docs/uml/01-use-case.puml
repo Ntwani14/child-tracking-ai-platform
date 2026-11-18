@@ -1,0 +1,53 @@
+@startuml use-case
+' Final use-case diagram - Missing Children Reporting System (ISJ107V Assignment 5)
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecaseBackgroundColor #F2F6FC
+skinparam usecaseBorderColor #1A3C6E
+skinparam actorBorderColor #1A3C6E
+
+actor "Community Member" as Member
+actor "Administrator" as Admin
+actor "AI Service\n(mcrs-ai)" as AI <<system>>
+actor "Gmail SMTP" as Mail <<external>>
+
+Admin -|> Member
+
+rectangle "Missing Children Reporting System" {
+  usecase "Register / Login" as UC_Login
+  usecase "Reset Password\n(emailed code)" as UC_Reset
+  usecase "Submit Missing-Child Report" as UC_Submit
+  usecase "Upload Photo" as UC_Photo
+  usecase "Detect Duplicate Report" as UC_Detect
+  usecase "Notify Community\n(in-app + email)" as UC_Notify
+  usecase "Search & Filter Reports" as UC_Search
+  usecase "Share Report to Social Media" as UC_Share
+  usecase "Mark Child as Found" as UC_Found
+  usecase "View Notifications" as UC_ViewNotif
+  usecase "View Analytics" as UC_Analytics
+  usecase "Review Duplicate Flags\n(merge / dismiss)" as UC_Review
+  usecase "Update Report Status" as UC_Status
+}
+
+Member --> UC_Login
+Member --> UC_Reset
+Member --> UC_Submit
+Member --> UC_Search
+Member --> UC_Share
+Member --> UC_Found
+Member --> UC_ViewNotif
+Member --> UC_Analytics
+
+Admin --> UC_Review
+Admin --> UC_Status
+
+UC_Photo .> UC_Submit : <<extend>>
+UC_Submit ..> UC_Detect : <<include>>
+UC_Submit ..> UC_Notify : <<include>>
+UC_Found ..> UC_Notify : <<include>>
+
+UC_Detect --> AI
+UC_Notify --> AI
+AI --> Mail
+@enduml

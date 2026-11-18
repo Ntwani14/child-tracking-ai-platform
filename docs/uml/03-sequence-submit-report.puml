@@ -1,0 +1,47 @@
+@startuml sequence-submit-report
+' Sequence diagram - submit a missing-child report with AI duplicate detection
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+autonumber
+
+actor "Community\nMember" as U
+participant "React UI\n(SubmitReport.jsx)" as UI
+participant "Spring Boot API\n(ReportController /\nReportService)" as API
+participant "Cloudinary" as CDN
+database "PostgreSQL\n(mcrs-db)" as DB
+participant "Python AI Service\n(mcrs-ai)" as AI
+participant "Gmail SMTP" as SMTP
+
+U -> UI : Fill in form, choose photo
+UI -> UI : Client validation (age 0-17, required fields)
+
+opt photo selected
+  UI -> API : POST /api/images/upload
+  API -> CDN : upload image
+  CDN --> API : secure URL
+  API --> UI : imagePath (URL)
+end
+
+UI -> API : POST /api/reports (JWT, report JSON)
+API -> API : JwtAuthFilter validates token\n@Valid ReportRequest
+
+alt invalid input
+  API --> UI : 400 {"error": "...age 17 or under"}
+  UI --> U : Show error, keep form data
+else valid
+  API -> DB : INSERT report (status = active)
+  API -> AI : POST /api/detect-duplicate
+  AI -> DB : SELECT active reports
+  AI -> AI : TF-IDF + cosine similarity
+  AI --> API : is_duplicate, highest_score, match
+  opt highest_score >= 0.25
+    API -> DB : INSERT duplicate_flag (reviewed = false)
+  end
+  note right of API : If the AI call fails, the error is logged\nand the report is still saved.
+  API -> DB : INSERT notifications (all users except submitter)
+  API ->> AI : POST /send-email (background thread)
+  API --> UI : 200 OK (ReportResponse)
+  UI --> U : Confirmation, report on dashboard
+  AI -> SMTP : Send alert email to each recipient
+end
+@enduml

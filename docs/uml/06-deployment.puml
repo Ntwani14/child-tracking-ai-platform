@@ -1,0 +1,35 @@
+@startuml deployment
+' Deployment view - four independently hosted modules on Render plus external services
+skinparam shadowing false
+skinparam nodeBackgroundColor #F2F6FC
+skinparam nodeBorderColor #1A3C6E
+
+node "User device" {
+  artifact "Web browser /\ninstalled PWA" as Browser
+}
+
+cloud "Render cloud (Oregon, US West)" {
+  node "Static Site" {
+    artifact "React build\n(mcrs-frontend)" as FE
+  }
+  node "Web Service - Docker\n(Starter, always-on)" {
+    artifact "Spring Boot JAR, Java 21\n(mcrs-backend)" as BE
+  }
+  node "Web Service - Python 3.11\n(Starter, always-on)" {
+    artifact "FastAPI + uvicorn\n(mcrs-ai)" as AI
+  }
+  database "Managed PostgreSQL\n(mcrs-db)" as DB
+}
+
+cloud "Cloudinary CDN" as CDN
+cloud "Gmail SMTP\n(smtp.gmail.com)" as SMTP
+
+Browser --> FE : HTTPS (load app)
+Browser --> BE : HTTPS REST/JSON (JWT)
+Browser --> CDN : HTTPS (images)
+BE --> DB : JDBC
+BE --> AI : HTTPS REST/JSON
+BE --> CDN : HTTPS (upload)
+AI --> DB : psycopg2
+AI --> SMTP : SMTP (TLS)
+@enduml

@@ -1,0 +1,80 @@
+@startuml class
+' Final class diagram - key entities (JPA, package com.childtracking.model)
+' and the services that implement the main workflow (com.childtracking.service)
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #F2F6FC
+skinparam classBorderColor #1A3C6E
+hide empty members
+
+package "model (JPA entities -> PostgreSQL tables)" {
+  class User <<Entity>> {
+    - userId : UUID
+    - fullName : String
+    - email : String  {unique}
+    - passwordHash : String  {BCrypt}
+    - role : String  {user | admin}
+    - location : String
+    - createdAt : LocalDateTime
+  }
+
+  class Report <<Entity>> {
+    - reportId : UUID
+    - childName : String
+    - age : Integer  {0..17}
+    - gender : String
+    - physicalDescription : String
+    - lastSeenLocation : String
+    - dateLastSeen : LocalDate
+    - imagePath : String  {Cloudinary URL}
+    - status : String  {active | found | duplicate}
+    - foundNote : String
+    - createdAt : LocalDateTime
+  }
+
+  class DuplicateFlag <<Entity>> {
+    - flagId : UUID
+    - similarityScore : BigDecimal
+    - reviewed : Boolean
+    - createdAt : LocalDateTime
+  }
+
+  class Notification <<Entity>> {
+    - notificationId : UUID
+    - message : String
+    - sentAt : LocalDateTime
+  }
+}
+
+package "service" {
+  class ReportService {
+    + submitReport(request, userEmail) : ReportResponse
+    + markAsFound(id, userEmail, foundNote) : ReportResponse
+    + getAllActiveReports() : List<ReportResponse>
+  }
+  class AiDuplicateService {
+    + checkForDuplicate(report : Report) : void
+  }
+  class NotificationService {
+    + sendAlertNotifications(report : Report) : void
+    + sendFoundNotification(report : Report) : void
+  }
+  class EmailService {
+    + sendAlertEmails(report, users) : void
+    + sendFoundEmails(report, users) : void
+    - sendViaAiService(recipients, subject, body) : void
+  }
+}
+
+User "1" -- "0..*" Report : submits >
+User "1" -- "0..*" Notification : receives >
+Report "1" -- "0..*" Notification : triggers >
+Report "1" -- "0..*" DuplicateFlag : report >
+Report "1" -- "0..*" DuplicateFlag : matchedReport >
+
+ReportService --> AiDuplicateService : uses
+ReportService --> NotificationService : uses
+NotificationService --> EmailService : uses
+AiDuplicateService ..> DuplicateFlag : creates
+NotificationService ..> Notification : creates
+@enduml
